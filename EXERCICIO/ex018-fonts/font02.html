@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testando Fontes Baixadas</title>
+    <style>/*Para adicionar uma fonte externa.*/
+        @font-face {
+            font-family:'letras';
+            src: url('REQUEMA.otf') format('opentype'), 
+            url('REQUEMA.ttf') format('truetype'); 
+            font-weight:normal; font-style: normal; 
+           
+            /*Tipos de Format()
+            - opentype (otf)
+            -truetype(ttf)
+            - embedded-opentype
+            -truetype-aat
+            -svg*/
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Kablammo&display=swap');
+body {
+    font-family: 'freehand', Helvetica, sans-serif;
+}
+   h1 {/*fontes a serem usadas*/
+    font-family: 'letras', Times, serif;
+/*tamanho da fonte*/
+font-size: 3em ; font-weight: normal;
+text-align: center;   
+}
+   
+   
+   </style>
+
+</head>
+<body>
+    <h1>Fontes Externas</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum dolorem, pariatur est quis molestiae cupiditate praesentium quisquam error, blanditiis laudantium odio sunt repellat ratione ipsum odit distinctio aut asperiores quod!</p>
+    <p><a href="font01.html">Página Inicial</a></p>
+</body>
+</html>

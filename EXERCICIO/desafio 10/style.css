@@ -1,0 +1,92 @@
+@charset "UTF-8";
+@font-face {
+    font-family:'tecnology';
+    src:url("tecnology.ttf")format('opentype')
+    url('tecnology.ttf')format('truetype');
+    
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    background-color: aquamarine;
+}
+header {
+    background-color: #08A341;
+    margin: auto;
+    padding: 10px;
+    font-family: 'tecnology';
+    
+
+
+}
+h1 {font-family: 'tecnology';
+    text-align: center;
+}
+#letrasmenores {
+   font-size: 16px;
+   text-align: center;
+}
+div {
+    text-align: center;
+}
+p {
+    text-indent: 5%;
+    text-align: justify;
+    padding: 10px;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+.paragrafosemrestricao {
+    padding: 0%;
+    text-align: center;
+    background-color: #08A341;
+    width: auto;
+    
+}
+nav {
+    padding-top: 10px;
+}
+nav > a{
+    padding-left: 5px;
+    
+}
+h2 {color: white;
+    background-color: #407a44b3;
+   
+    border-radius: 3px;
+    margin-top: 5%;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-bottom: 5%;
+    padding-top: 1%;
+    padding-left: 1%;
+    
+}
+img {
+    background-color: white;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+footer {
+    background-color: white;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+h3 {
+    background-color: #407a44b3;
+    color: white;
+    margin-top: 5%;
+    margin-left: 0%;
+    margin-right: 0%;
+    margin-bottom: 5%;
+    padding-top: 1%;
+    padding-left: 1%;
+    border-radius: 5px 5px 0px 0px;
+}
+span {
+    background-color: #83e0a5be;
+    display: block;
+    margin-left: 3%;
+    margin-right: 3%;
+    border-radius: 5px;
+}

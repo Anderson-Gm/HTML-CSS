@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Links</title>
+<style>
+/*Seletores em CSS: 
+  #   = id
+  .   = class
+  :   = pseudo-class
+  ::  = pseudo-element
+  >   = clildren
+*/
+
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {/*cor da letra*/
+    color: red;
+    /*tirar sublinhado de baixo do texto*/
+    text-decoration: none;
+    /*borda do texto*/
+    font-weight: bold;
+    
+}
+a:visited {/*cor do link ja visitado*/
+    color:darkred
+}
+a:hover {/*sublinhar qundo passar o cursor do mouse por cima*/
+    text-decoration: underline;
+    color:black
+}
+a:active {/*mudar de cor quando clicar no objeto*/
+    color:aqua
+}
+a::after {  /*para adicionar um nome no final de cada objeto*/
+    content: ' [link]';/*EXEMPLO*/
+    text-decoration: none;
+    font-weight: normal;
+    color:rgb(211, 243, 243)
+}
+.especial {
+    background-color: rgb(248, 140, 140);
+}
+.especial:after {/*para adicionar simbolo depois do objeto*/
+    content: ' ⇤';
+}
+.especial::before {/*para adicionar simbolo antes do objeto*/
+    content: '⇥ ';
+}
+/*Para nao sair da pagina usa-se a tag (target="_blank")*/
+</style>
+</head>
+<body>
+<h1>Personalizando Links</h1>
+<ul>                                            
+<li><a href="https://gustavoguanabara.github.io"class="especial" target="_blank">Repositório Github</a></li>
+<li><a href="https://youtube.com/cursoemvideo/" target="_blank">Canal do YouTube</a></li>
+<li><a href="htpps://www.cursoemvideo.com"class="especial" target="_blank">Site do CursoemVideo</a></li>
+</ul>
+    
+</body>
+</html>

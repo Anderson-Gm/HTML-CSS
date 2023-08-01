@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quando usar itálico | Blog Português sem Mistério</title>
+<link rel="profile" href="http://gmpg.org/xfn/11" />
+<link rel="pingback" href="https://portuguessemmisterio.com.br/xmlrpc.php" />
+<!--[if lt IE 9]>
+<script src="https://s0.wp.com/wp-content/themes/pub/expound/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+
+<meta name='robots' content='max-image-preview:large' />
+
+<!-- Async WordPress.com Remote Login -->
+<script id="wpcom_remote_login_js">
+var wpcom_remote_login_extra_auth = '';
+function wpcom_remote_login_remove_dom_node_id( element_id ) {
+	var dom_node = document.getElementById( element_id );
+	if ( dom_node ) { dom_node.parentNode.removeChild( dom_node ); }
+}
+function wpcom_remote_login_remove_dom_node_classes( class_name ) {
+	var dom_nodes = document.querySelectorAll( '.' + class_name );
+	for ( var i = 0; i < dom_nodes.length; i++ ) {
+		dom_nodes[ i ].parentNode.removeChild( dom_nodes[ i ] );
+	}
+}
+function wpcom_remote_login_final_cleanup() {
+	wpcom_remote_login_remove_dom_node_classes( "wpcom_remote_login_msg" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_key" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_validate" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_js" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_request_access_iframe" );
+	wpcom_remote_login_remove_dom_node_id( "wpcom_request_access_styles" );
+}
+
+// Watch for messages back from the remote login
+window.addEventListener( "message", function( e ) {
+	if ( e.origin === "https://r-login.wordpress.com" ) {
+		var data = {};
+		try {
+			data = JSON.parse( e.data );
+		} catch( e ) {
+			wpcom_remote_login_final_cleanup();
+			return;
+		}
+
+		if ( data.msg === 'LOGIN' ) {
+			// Clean up the login check iframe
+			wpcom_remote_login_remove_dom_node_id( "wpcom_remote_login_key" );
+
+			var id_regex = new RegExp( /^[0-9]+$/ );
+			var token_regex = new RegExp( /^.*|.*|.*$/ );
+			if (
+				token_regex.test( data.token )
+				&& id_regex.test( data.wpcomid )
+			) {
+				// We have everything we need to ask for a login
+				var script = document.createElement( "script" );
+				script.setAttribute( "id", "wpcom_remote_login_validate" );
+				script.src = '/remote-login.php?wpcom_remote_login=validate'
+					+ '&wpcomid=' + data.wpcomid
+					+ '&token=' + encodeURIComponent( data.token )
+					+ '&host=' + window.location.protocol
+					+ '//' + window.location.hostname
+					+ '&postid=836'
+					+ '&is_singular=1';
+				document.body.appendChild( script );
+			}
+
+			return;
+		}
+
+		// Safari ITP, not logged in, so redirect
+		if ( data.msg === 'LOGIN-REDIRECT' ) {
+			window.location = 'https://wordpress.com/log-in?redirect_to=' + window.location.href;
+			return;
+		}
+
+		// Safari ITP, storage access failed, remove the request
+		if ( data.msg === 'LOGIN-REMOVE' ) {
+			var css_zap = 'html { -webkit-transition: margin-top 1s; transition: margin-top 1s; } /* 9001 */ html { margin-top: 0 !important; } * html body { margin-top: 0 !important; } @media screen and ( max-width: 782px ) { html { margin-top: 0 !important; } * html body { margin-top: 0 !important; } }';
+			var style_zap = document.createElement( 'style' );
+			style_zap.type = 'text/css';
+			style_zap.appendChild( document.createTextNode( css_zap ) );
+			document.body.appendChild( style_zap );
+
+			var e = document.getElementById( 'wpcom_request_access_iframe' );
+			e.parentNode.removeChild( e );
+
+			document.cookie = 'wordpress_com_login_access=denied; path=/; max-age=31536000';
+
+			return;
+		}
+
+		// Safari ITP
+		if ( data.msg === 'REQUEST_ACCESS' ) {
+			console.log( 'request access: safari' );
+
+			// Check ITP iframe enable/disable knob
+			if ( wpcom_remote_login_extra_auth !== 'safari_itp_iframe' ) {
+				return;
+			}
+
+			// If we are in a "private window" there is no ITP.
+			var private_window = false;
+			try {
+				var opendb = window.openDatabase( null, null, null, null );
+			} catch( e ) {
+				private_window = true;
+			}
+
+			if ( private_window ) {
+				console.log( 'private window' );
+				return;
+			}
+
+			var iframe = document.createElement( 'iframe' );
+			iframe.id = 'wpcom_request_access_iframe';
+			iframe.setAttribute( 'scrolling', 'no' );
+			iframe.setAttribute( 'sandbox', 'allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-top-navigation-by-user-activation' );
+			iframe.src = 'https://r-login.wordpress.com/remote-login.php?wpcom_remote_login=request_access&origin=' + encodeURIComponent( data.origin ) + '&wpcomid=' + encodeURIComponent( data.wpcomid );
+
+			var css = 'html { -webkit-transition: margin-top 1s; transition: margin-top 1s; } /* 9001 */ html { margin-top: 46px !important; } * html body { margin-top: 46px !important; } @media screen and ( max-width: 660px ) { html { margin-top: 71px !important; } * html body { margin-top: 71px !important; } #wpcom_request_access_iframe { display: block; height: 71px !important; } } #wpcom_request_access_iframe { border: 0px; height: 46px; position: fixed; top: 0; left: 0; width: 100%; min-width: 100%; z-index: 99999; background: #23282d; } ';
+
+			var style = document.createElement( 'style' );
+			style.type = 'text/css';
+			style.id = 'wpcom_request_access_styles';
+			style.appendChild( document.createTextNode( css ) );
+			document.body.appendChild( style );
+
+			document.body.appendChild( iframe );
+		}
+
+		if ( data.msg === 'DONE' ) {
+			wpcom_remote_login_final_cleanup();
+		}
+	}
+}, false );
+
+// Inject the remote login iframe after the page has had a chance to load
+// more critical resources
+window.addEventListener( "DOMContentLoaded", function( e ) {
+	var iframe = document.createElement( "iframe" );
+	iframe.style.display = "none";
+	iframe.setAttribute( "scrolling", "no" );
+	iframe.setAttribute( "id", "wpcom_remote_login_key" );
+	iframe.src = "https://r-login.wordpress.com/remote-login.php"
+		+ "?wpcom_remote_login=key"
+		+ "&origin=aHR0cHM6Ly9wb3J0dWd1ZXNzZW1taXN0ZXJpby5jb20uYnI%3D"
+		+ "&wpcomid=94243537"
+		+ "&time=1685544707";
+	document.body.appendChild( iframe );
+}, false );
+</script>
+<link rel='dns-prefetch' href='//s0.wp.com' />
+<link rel='dns-prefetch' href='//wordpress.com' />
+<link rel='dns-prefetch' href='//s.pubmine.com' />
+<link rel='dns-prefetch' href='//x.bidswitch.net' />
+<link rel='dns-prefetch' href='//static.criteo.net' />
+<link rel='dns-prefetch' href='//ib.adnxs.com' />
+<link rel='dns-prefetch' href='//aax.amazon-adsystem.com' />
+<link rel='dns-prefetch' href='//bidder.criteo.com' />
+<link rel='dns-prefetch' href='//cas.criteo.com' />
+<link rel='dns-prefetch' href='//gum.criteo.com' />
+<link rel='dns-prefetch' href='//ads.pubmatic.com' />
+<link rel='dns-prefetch' href='//gads.pubmatic.com' />
+<link rel='dns-prefetch' href='//tpc.googlesyndication.com' />
+<link rel='dns-prefetch' href='//ad.doubleclick.net' />
+<link rel='dns-prefetch' href='//googleads.g.doubleclick.net' />
+<link rel='dns-prefetch' href='//www.googletagservices.com' />
+<link rel='dns-prefetch' href='//cdn.switchadhub.com' />
+<link rel='dns-prefetch' href='//delivery.g.switchadhub.com' />
+<link rel='dns-prefetch' href='//delivery.swid.switchadhub.com' />
+<link rel='dns-prefetch' href='//a.teads.tv' />
+<link rel='dns-prefetch' href='//prebid.media.net' />
+<link rel='dns-prefetch' href='//adserver-us.adtech.advertising.com' />
+<link rel='dns-prefetch' href='//fastlane.rubiconproject.com' />
+<link rel='dns-prefetch' href='//prebid-server.rubiconproject.com' />
+<link rel='dns-prefetch' href='//hb-api.omnitagjs.com' />
+<link rel='dns-prefetch' href='//mtrx.go.sonobi.com' />
+<link rel='dns-prefetch' href='//apex.go.sonobi.com' />
+<link rel='dns-prefetch' href='//u.openx.net' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="Feed para Blog Português sem Mistério &raquo;" href="https://portuguessemmisterio.com.br/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Feed de comentários para Blog Português sem Mistério &raquo;" href="https://portuguessemmisterio.com.br/comments/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Feed de comentários para Blog Português sem Mistério &raquo; Quando usar itálico" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/feed/" />
+	<script type="text/javascript">
+		/* <![CDATA[ */
+		function addLoadEvent(func) {
+			var oldonload = window.onload;
+			if (typeof window.onload != 'function') {
+				window.onload = func;
+			} else {
+				window.onload = function () {
+					oldonload();
+					func();
+				}
+			}
+		}
+		/* ]]> */
+	</script>
+	<script type="text/javascript">
+window._wpemojiSettings = {"baseUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/72x72\/","ext":".png","svgUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/s0.wp.com\/wp-includes\/js\/wp-emoji-release.min.js?m=1677072837h&ver=6.2.1-RC1-55769"}};
+/*! This file is auto-generated */
+!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){p.clearRect(0,0,i.width,i.height),p.fillText(e,0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(t,0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(p&&p.fillText)switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s("\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!s("\ud83c\uddfa\ud83c\uddf3","\ud83c\uddfa\u200b\ud83c\uddf3")&&!s("\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!s("\ud83e\udef1\ud83c\udffb\u200d\ud83e\udef2\ud83c\udfff","\ud83e\udef1\ud83c\udffb\u200b\ud83e\udef2\ud83c\udfff")}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(e=t.source||{}).concatemoji?c(e.concatemoji):e.wpemoji&&e.twemoji&&(c(e.twemoji),c(e.wpemoji)))}(window,document,window._wpemojiSettings);
+</script>
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 0.07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link crossorigin='anonymous' rel='stylesheet' id='all-css-0-1' href='https://s0.wp.com/_static/??-eJyFUVtuwzAMu9AcIRg6dB/DjjL4IXhq/YJlJ83t56ZLkK5r+2OYMinSEoxJ6BgKhgLKRSuSq5YCwxizkYbBuqik6zTzC2y4vq5MR0dkOGBJUh/FjG7oC9fWBhVm214ywtDvun3Xg6rkzNl/bqCyzBNwmRw+8l0cLxh8jGGpfQ0YTMwga4lelkJ6ZQ9kMKaMzFeuaKg0wQwYZlI7cVwDUNCumvNHGXxjS3To50QbkJycMAuHVuqp8xSey9vbFl+J7k/vN+c6dDnFWoTNZO7M7WmLLAsFy3/ka+xWAO0kM2lRvltU/jfpZj3nBbe6T/L2kw9kIxmL5WJ4uYuCp8eS1GyEUvNWRTs9Vb+kbLpP/9G/7Xf9a79/3x1+AJnqHNI=&cssminify=yes' type='text/css' media='all' />
+<style id='wp-block-library-inline-css'>
+.has-text-align-justify {
+	text-align:justify;
+}
+.wp-block-cover__image-background.has-parallax {
+	background-size: cover;
+}
+</style>
+<style id='global-styles-inline-css'>
+body{--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--font-family--albert-sans: 'Albert Sans';--wp--preset--font-family--alegreya: Alegreya;--wp--preset--font-family--arvo: Arvo;--wp--preset--font-family--bodoni-moda: 'Bodoni Moda';--wp--preset--font-family--cabin: Cabin;--wp--preset--font-family--chivo: Chivo;--wp--preset--font-family--commissioner: Commissioner;--wp--preset--font-family--cormorant: Cormorant;--wp--preset--font-family--courier-prime: 'Courier Prime';--wp--preset--font-family--crimson-pro: 'Crimson Pro';--wp--preset--font-family--dm-mono: 'DM Mono';--wp--preset--font-family--dm-sans: 'DM Sans';--wp--preset--font-family--domine: Domine;--wp--preset--font-family--eb-garamond: 'EB Garamond';--wp--preset--font-family--epilogue: Epilogue;--wp--preset--font-family--figtree: Figtree;--wp--preset--font-family--fira-sans: 'Fira Sans';--wp--preset--font-family--fraunces: Fraunces;--wp--preset--font-family--ibm-plex-mono: 'IBM Plex Mono';--wp--preset--font-family--ibm-plex-sans: 'IBM Plex Sans';--wp--preset--font-family--inter: Inter;--wp--preset--font-family--josefin-sans: 'Josefin Sans';--wp--preset--font-family--jost: Jost;--wp--preset--font-family--libre-baskerville: 'Libre Baskerville';--wp--preset--font-family--libre-franklin: 'Libre Franklin';--wp--preset--font-family--literata: Literata;--wp--preset--font-family--lora: Lora;--wp--preset--font-family--merriweather: Merriweather;--wp--preset--font-family--montserrat: Montserrat;--wp--preset--font-family--newsreader: Newsreader;--wp--preset--font-family--nunito: Nunito;--wp--preset--font-family--open-sans: 'Open Sans';--wp--preset--font-family--overpass: Overpass;--wp--preset--font-family--petrona: Petrona;--wp--preset--font-family--piazzolla: Piazzolla;--wp--preset--font-family--playfair-display: 'Playfair Display';--wp--preset--font-family--plus-jakarta-sans: 'Plus Jakarta Sans';--wp--preset--font-family--poppins: Poppins;--wp--preset--font-family--raleway: Raleway;--wp--preset--font-family--roboto-slab: 'Roboto Slab';--wp--preset--font-family--roboto: Roboto;--wp--preset--font-family--rubik: Rubik;--wp--preset--font-family--sora: Sora;--wp--preset--font-family--source-sans-pro: 'Source Sans Pro';--wp--preset--font-family--source-serif-pro: 'Source Serif Pro';--wp--preset--font-family--space-mono: 'Space Mono';--wp--preset--font-family--texturina: Texturina;--wp--preset--font-family--work-sans: 'Work Sans';--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}body .is-layout-flow > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-flow > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-flow > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignleft{float: left;margin-inline-start: 0;margin-inline-end: 2em;}body .is-layout-constrained > .alignright{float: right;margin-inline-start: 2em;margin-inline-end: 0;}body .is-layout-constrained > .aligncenter{margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width: var(--wp--style--global--content-size);margin-left: auto !important;margin-right: auto !important;}body .is-layout-constrained > .alignwide{max-width: var(--wp--style--global--wide-size);}body .is-layout-flex{display: flex;}body .is-layout-flex{flex-wrap: wrap;align-items: center;}body .is-layout-flex > *{margin: 0;}body .is-layout-grid{display: grid;}body .is-layout-grid > *{margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}
+.wp-block-pullquote{font-size: 1.5em;line-height: 1.6;}
+.wp-block-navigation a:where(:not(.wp-element-button)){color: inherit;}
+</style>
+<link crossorigin='anonymous' rel='stylesheet' id='all-css-2-1' href='https://s0.wp.com/_static/??-eJx9jsEOAjEIRH/Iims82IPxW3YrVrSFZkuj/r2oia6aeJt5MANwLi4IK7JCbq6kFokrBMnZkEt0QnP1i8yNzICARcnS9SWeg0mnHjBbQ2kD4KVI4x1UvSb8WZwcjyguSeiVhD+M26eexn/REYck0WR8PP2299A2b7qV975bL/3ieAN4hF0n&cssminify=yes' type='text/css' media='all' />
+<style id='jetpack-global-styles-frontend-style-inline-css'>
+:root { --font-headings: unset; --font-base: unset; --font-headings-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; --font-base-default: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;}
+</style>
+<link crossorigin='anonymous' rel='stylesheet' id='all-css-4-1' href='https://s0.wp.com/_static/??-eJyNjcEKwjAQRH/IuASt1IP4KbJNliR1kw1ugvj3bcWLePEyzIPhDTyrcVIalQa5m8o9pKIwU6vo7h+GLLKF70wKGvFBHr1/vWsqYe9Ud/C/6ZaKAxWXkA1LEP2CH1uLlNffeITAMiFvg2u+2NM42IMdz8O8AFFISS0=&cssminify=yes' type='text/css' media='all' />
+<script id='wpcom-actionbar-placeholder-js-extra'>
+var actionbardata = {"siteID":"94243537","siteURL":"https:\/\/portuguessemmisterio.com.br","xhrURL":"https:\/\/portuguessemmisterio.com.br\/wp-admin\/admin-ajax.php","nonce":"4e35d33535","isLoggedIn":"","statusMessage":"","subsEmailDefault":"instantly","proxyScriptUrl":"https:\/\/s0.wp.com\/wp-content\/js\/wpcom-proxy-request.js?ver=20211021","shortlink":"https:\/\/wp.me\/p6nr33-du","i18n":{"followedText":"Novos posts deste site agora aparecer\u00e3o no seu <a href=\"https:\/\/wordpress.com\/read\">Leitor<\/a>","foldBar":"Esconder esta barra","unfoldBar":"Mostrar esta barra"}};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??/wp-content/js/mobile-useragent-info.js,/wp-content/js/rlt-proxy.js,/wp-content/blog-plugins/wordads-classes/js/cmp-non-gdpr.js?m=1653088172j'></script>
+<script type='text/javascript'>
+	window.addEventListener( 'DOMContentLoaded', function() {
+		rltInitialize( {"token":null,"iframeOrigins":["https:\/\/widgets.wp.com"]} );
+	} );
+</script>
+<link crossorigin='anonymous' rel='stylesheet' id='all-css-0-2' href='https://s0.wp.com/wp-content/mu-plugins/highlander-comments/style.css?m=1663315160h&cssminify=yes' type='text/css' media='all' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://portuguessemmisterio.wordpress.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://s0.wp.com/wp-includes/wlwmanifest.xml" />
+<meta name="generator" content="WordPress.com" />
+<link rel="canonical" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" />
+<link rel='shortlink' href='https://wp.me/p6nr33-du' />
+<link rel="alternate" type="application/json+oembed" href="https://public-api.wordpress.com/oembed/?format=json&amp;url=https%3A%2F%2Fportuguessemmisterio.com.br%2F2015%2F07%2F26%2Fquando-usar-italico%2F&amp;for=wpcom-auto-discovery" /><link rel="alternate" type="application/xml+oembed" href="https://public-api.wordpress.com/oembed/?format=xml&amp;url=https%3A%2F%2Fportuguessemmisterio.com.br%2F2015%2F07%2F26%2Fquando-usar-italico%2F&amp;for=wpcom-auto-discovery" />
+<!-- Jetpack Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Quando usar itálico" />
+<meta property="og:url" content="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" />
+<meta property="og:description" content="1) Nomes de navios, livros, revistas, jornais, filmes, músicas, contos, poemas, peças teatrais, programas de rádio e televisão, obras de arte, pinturas, esculturas, CDs.  Exemplos: Na canção Hotel …" />
+<meta property="article:published_time" content="2015-07-26T19:42:10+00:00" />
+<meta property="article:modified_time" content="2019-08-01T17:55:44+00:00" />
+<meta property="og:site_name" content="Blog Português sem Mistério" />
+<meta property="og:image" content="https://portuguessemmisterio.files.wordpress.com/2015/07/itc3a1lico.png?w=1200" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="1200" />
+<meta property="og:image:alt" content="" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="article:publisher" content="https://www.facebook.com/WordPresscom" />
+<meta name="twitter:creator" content="@PortuguesSM" />
+<meta name="twitter:site" content="@PortuguesSM" />
+<meta name="twitter:text:title" content="Quando usar itálico" />
+<meta name="twitter:image" content="https://portuguessemmisterio.files.wordpress.com/2015/07/itc3a1lico.png?w=640" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- End Jetpack Open Graph Tags -->
+<link rel='openid.server' href='https://portuguessemmisterio.com.br/?openidserver=1' />
+<link rel='openid.delegate' href='https://portuguessemmisterio.com.br/' />
+<link rel="search" type="application/opensearchdescription+xml" href="https://portuguessemmisterio.com.br/osd.xml" title="Blog Português sem Mistério" />
+<link rel="search" type="application/opensearchdescription+xml" href="https://s1.wp.com/opensearch.xml" title="WordPress.com" />
+<meta name="theme-color" content="#eaeaea" />
+		<style type="text/css">
+			.recentcomments a {
+				display: inline !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+
+			table.recentcommentsavatartop img.avatar, table.recentcommentsavatarend img.avatar {
+				border: 0px;
+				margin: 0;
+			}
+
+			table.recentcommentsavatartop a, table.recentcommentsavatarend a {
+				border: 0px !important;
+				background-color: transparent !important;
+			}
+
+			td.recentcommentsavatarend, td.recentcommentsavatartop {
+				padding: 0px 0px 1px 0px;
+				margin: 0px;
+			}
+
+			td.recentcommentstextend {
+				border: none !important;
+				padding: 0px 0px 2px 10px;
+			}
+
+			.rtl td.recentcommentstextend {
+				padding: 0px 10px 2px 0px;
+			}
+
+			td.recentcommentstexttop {
+				border: none;
+				padding: 0px 0px 0px 10px;
+			}
+
+			.rtl td.recentcommentstexttop {
+				padding: 0px 10px 0px 0px;
+			}
+		</style>
+		<meta name="application-name" content="Blog Português sem Mistério" /><meta name="msapplication-window" content="width=device-width;height=device-height" /><meta name="msapplication-tooltip" content="Dicas de português. Conheça os erros mais frequentes de gramática e ortografia. Serviço de revisão de texto.  Betty Vibranovski" /><meta name="msapplication-task" content="name=Assinar;action-uri=https://portuguessemmisterio.com.br/feed/;icon-uri=https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=16" /><meta name="msapplication-task" content="name=Registre um blog gratuito;action-uri=http://wordpress.com/signup/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=Suporte do WordPress.com;action-uri=http://support.wordpress.com/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="msapplication-task" content="name=WordPress.com Fóruns;action-uri=http://forums.wordpress.com/;icon-uri=https://s0.wp.com/i/favicon.ico" /><meta name="description" content="1) Nomes de navios, livros, revistas, jornais, filmes, músicas, contos, poemas, peças teatrais, programas de rádio e televisão, obras de arte, pinturas, esculturas, CDs.  Exemplos: Na canção Hotel Fraternité, do álbum Qualquer, Arnaldo Antunes fala de um homem fora de si. O livro Sapiens - uma breve história da humanidade é sensacional. Já assistiu ao filme Missão&hellip;" />
+	<style type="text/css">
+			.site-title,
+        .site-description {
+            position: absolute !important;
+            clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+            clip: rect(1px, 1px, 1px, 1px);
+        }
+
+        
+	
+			.site-header .site-branding {
+			background-color: transparent;
+			background-image: url('https://portuguessemmisterio.files.wordpress.com/2017/12/cropped-capa-blog-portugues-sem-mistecc81rio-vale-esta.jpg');
+			background-position: 50% 0;
+			background-repeat: no-repeat;
+			height: 388px;
+		}
+		</style>
+	<style type="text/css" id="custom-background-css">
+body.custom-background { background-color: #eaeaea; }
+</style>
+			<script type='application/javascript' src='https://ced.sascdn.com/tag/3905/smart.js' async></script>
+		<script type='application/javascript'>
+			var sas = sas || {};
+			var sas_fallback = sas_fallback || [];
+			sas.cmd = sas.cmd || [];
+			sas.cmd.push(function() {
+				sas.setup({networkid: 3905, domain: 'https://www15.smartadserver.com', async: true});
+			});
+			sas.cmd.push(function() {
+				sas.call('onecall', {
+					siteId: 560111,
+					pageId: 1700829,
+					formats: [
+						{ id: 110354, tagId: "sas_110354" }
+					],
+					target: 'iab_category=IAB1;iab_category=IAB8;iab_category=IAB19;wp_blog_id=94243537;language=pt',
+				});
+			});
+			sas.cmd.push(function() {
+				sas.events.on('noad', function(data) {
+					var el = document.getElementById(data.tagId);
+					var wrapper = el.closest('.wordads-ad-wrapper');
+					
+					if ( sas_fallback.length === 0 ) {
+						wrapper.remove();
+						return;
+					}
+					
+					// Process first tag.
+					var tag = sas_fallback[0].tag;
+					
+					// Unescape the tag markup.
+					var e = document.createElement('div');
+					e.innerHTML = tag;
+					tag = e.childNodes[0].nodeValue;
+					
+					// Insert the tag.
+					wrapper.innerHTML = tag;
+					
+					// Process any scripts in the tag.
+					var scripts = wrapper.querySelectorAll('script');
+					scripts.forEach( function (script) {
+						script.parentNode.removeChild(script);
+						
+						var scriptTag = document.createElement('script');
+						
+						if (script.src) {
+							scriptTag.src = script.src;
+						} else if (script.textContent) {
+							scriptTag.textContent = script.textContent;
+						} else if (script.innerText) {
+							scriptTag.innerText = script.innerText;
+						}
+						
+						document.body.appendChild(scriptTag);
+					});
+				});
+			});
+			sas.cmd.push(function() {
+				sas.events.on('load', function(data) {
+					var el = document.getElementById(data.tagId);
+					el.closest('.wordads-ad-wrapper').style.display = 'inherit';
+				});
+			});
+		</script>		<script type="text/javascript">
+		function __ATA_CC() {var v = document.cookie.match('(^|;) ?personalized-ads-consent=([^;]*)(;|$)');return v ? 1 : 0;}
+		var __ATA_PP = { 'pt': 1, 'ht': 1, 'tn': 'expound', 'uloggedin': 0, 'amp': false, 'consent': __ATA_CC(), 'gdpr_applies': false, 'ad': { 'label': { 'text': 'Anúncios' }, 'reportAd': { 'text': 'Denunciar este anúncio' } }, 'siteid': 94243537, 'afp_ad_client': 'pub-8340823528655916' };
+		var __ATA = __ATA || {};
+		__ATA.cmd = __ATA.cmd || [];
+		__ATA.criteo = __ATA.criteo || {};
+		__ATA.criteo.cmd = __ATA.criteo.cmd || [];
+		</script>
+		<script type="text/javascript">
+		(function(){var g=Date.now||function(){return+new Date};function h(a,b){a:{for(var c=a.length,d="string"==typeof a?a.split(""):a,e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1}return 0>b?null:"string"==typeof a?a.charAt(b):a[b]};function k(a,b,c){c=null!=c?"="+encodeURIComponent(String(c)):"";if(b+=c){c=a.indexOf("#");0>c&&(c=a.length);var d=a.indexOf("?");if(0>d||d>c){d=c;var e=""}else e=a.substring(d+1,c);a=[a.substr(0,d),e,a.substr(c)];c=a[1];a[1]=b?c?c+"&"+b:b:c;a=a[0]+(a[1]?"?"+a[1]:"")+a[2]}return a};var l=0;function m(a,b){var c=document.createElement("script");c.src=a;c.onload=function(){b&&b(void 0)};c.onerror=function(){b&&b("error")};a=document.getElementsByTagName("head");var d;a&&0!==a.length?d=a[0]:d=document.documentElement;d.appendChild(c)}function n(a){var b=void 0===b?document.cookie:b;return(b=h(b.split("; "),function(c){return-1!=c.indexOf(a+"=")}))?b.split("=")[1]:""}function p(a){return"string"==typeof a&&0<a.length}
+		function r(a,b,c){b=void 0===b?"":b;c=void 0===c?".":c;var d=[];Object.keys(a).forEach(function(e){var f=a[e],q=typeof f;"object"==q&&null!=f||"function"==q?d.push(r(f,b+e+c)):null!==f&&void 0!==f&&(e=encodeURIComponent(b+e),d.push(e+"="+encodeURIComponent(f)))});return d.filter(p).join("&")}function t(a,b){a||((window.__ATA||{}).config=b.c,m(b.url))}var u=Math.floor(1E13*Math.random()),v=window.__ATA||{};window.__ATA=v;window.__ATA.cmd=v.cmd||[];v.rid=u;v.createdAt=g();var w=window.__ATA||{},x="s.pubmine.com";
+		w&&w.serverDomain&&(x=w.serverDomain);var y="//"+x+"/conf",z=window.top===window,A=window.__ATA_PP&&window.__ATA_PP.gdpr_applies,B="boolean"===typeof A?Number(A):null,C=window.__ATA_PP||null,D=z?document.referrer?document.referrer:null:null,E=z?window.location.href:document.referrer?document.referrer:null,F,G=n("__ATA_tuuid");F=G?G:null;var H=window.innerWidth+"x"+window.innerHeight,I=n("usprivacy"),J=r({gdpr:B,pp:C,rid:u,src:D,ref:E,tuuid:F,vp:H,us_privacy:I?I:null},"",".");
+		(function(a){var b=void 0===b?"cb":b;l++;var c="callback__"+g().toString(36)+"_"+l.toString(36);a=k(a,b,c);window[c]=function(d){t(void 0,d)};m(a,function(d){d&&t(d)})})(y+"?"+J);}).call(this);
+		</script>	<script>
+		var sas_fallback = sas_fallback || [];
+		sas_fallback.push(
+			{ tag: "&lt;div id=&quot;atatags-26942-64775f031c9a6&quot;&gt;&lt;/div&gt;&lt;script&gt;__ATA.cmd.push(function() {__ATA.initDynamicSlot({id: \'atatags-26942-64775f031c9a6\',location: 120,formFactor: \'001\',label: {text: \'Anúncios\',},creative: {reportAd: {text: \'Denunciar este anúncio\',},privacySettings: {text: \'Privacidade\',}}});});&lt;/script&gt;", }
+		);
+	</script><style type="text/css" id="custom-colors-css">button:hover, input[type="button"]:hover, input[type="reset"]:hover, input[type="submit"]:hover, .button-primary:hover, a.button-primary:hover, .wpm-button-primary:hover, a.wpm-button-primary:hover, button:focus, input[type="button"]:focus, input[type="reset"]:focus, input[type="submit"]:focus, .button-primary:focus, a.button-primary:focus, .wpm-button-primary:focus, a.wpm-button-primary:focus, button:active, input[type="button"]:active, input[type="reset"]:active, input[type="submit"]:active, .button-primary:active, a.button-primary:active, .wpm-button-primary:active, a.wpm-button-primary:active, #infinite-handle span { color: #FFFFFF;}
+button, input[type="button"], input[type="reset"], input[type="submit"], .button-primary, a.button-primary, a.button-primary:visited, .wpm-button-primary, a.wpm-button-primary { color: #FFFFFF;}
+.navigation-main a,.navigation-main a:visited { color: #FFFFFF;}
+.navigation-main li.current_page_item a, .navigation-main li.current-menu-item a,.navigation-main li.current_page_item a:visited, .navigation-main li.current-menu-item a:visited { color: #FFFFFF;}
+.navigation-main ul > .current_page_item:hover, .navigation-main ul > .current-menu-item:hover, .navigation-main ul > .current-post-ancestor:hover, .navigation-main ul > .current-menu-ancestor:hover, .navigation-main ul > .current-menu-parent:hover, .navigation-main ul > .current-post-parent:hover { color: #FFFFFF;}
+.site-footer a,.site-footer a:visited { color: #aaaaaa;}
+body { background-color: #eaeaea;}
+</style>
+<link rel="icon" href="https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=32" sizes="32x32" />
+<link rel="icon" href="https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=192" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=180" />
+<meta name="msapplication-TileImage" content="https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=200" />
+</head>
+
+<body class="post-template-default single single-post postid-836 single-format-standard custom-background customizer-styles-applied highlander-enabled highlander-light">
+<div id="page" class="hfeed site">
+		<header id="masthead" class="site-header" role="banner">
+		<div class="site-branding">
+			<a href="https://portuguessemmisterio.com.br/" class="wrapper-link">
+				<div class="site-title-group">
+					<h1 class="site-title"><a href="https://portuguessemmisterio.com.br/" title="Blog Português sem Mistério" rel="home">Blog Português sem Mistério</a></h1>
+					<h2 class="site-description">Dicas de português. Conheça os erros mais frequentes de gramática e ortografia. Serviço de revisão de texto.  Betty Vibranovski</h2>
+				</div>
+			</a>
+		</div>
+
+		<nav id="site-navigation" class="navigation-main" role="navigation">
+			<h1 class="menu-toggle">Menu</h1>
+			<div class="screen-reader-text skip-link"><a href="#content" title="Pular para o conteúdo">Pular para o conteúdo</a></div>
+
+			<div class="menu-principal-container"><ul id="menu-principal" class="menu"><li id="menu-item-88" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-88"><a href="https://portuguessemmisterio.wordpress.com/">Início</a></li>
+<li id="menu-item-84" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-84"><a href="https://portuguessemmisterio.com.br/sobre/">Sobre a autora</a>
+<ul class="sub-menu">
+	<li id="menu-item-89" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-89"><a href="https://portuguessemmisterio.com.br/sobre/">Sobre a autora &#8211; Trabalhos &#8211; Depoimentos &#8211; Clientes</a></li>
+	<li id="menu-item-3714" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3714"><a href="https://portuguessemmisterio.com.br/2018/07/16/lancamento-do-livro-as-cascas-de-banana-do-portugues-nao-escorregue-nas-minucias-do-nosso-idioma-da-revisora-betty-vibranovski/">Livro da autora</a></li>
+	<li id="menu-item-400" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-400"><a href="https://portuguessemmisterio.com.br/bibliografia/">Bibliografia</a></li>
+	<li id="menu-item-472" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-472"><a href="https://portuguessemmisterio.com.br/dicas-de-leitura/">Dicas de leitura</a></li>
+	<li id="menu-item-1762" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1762"><a href="https://portuguessemmisterio.com.br/contato/">Contato</a></li>
+</ul>
+</li>
+<li id="menu-item-91" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-91"><a href="https://portuguessemmisterio.com.br/category/gramatica/">Gramática</a>
+<ul class="sub-menu">
+	<li id="menu-item-4965" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4965"><a href="https://portuguessemmisterio.com.br/2022/01/06/palavras-para-indicar-tempo-passado-presente-e-futuro-ha-faz-atras-havia-fazia-daqui-a-a/">Indicações de tempo: há, faz, atrás, havia, fazia, daqui a, a</a></li>
+	<li id="menu-item-4964" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4964"><a href="https://portuguessemmisterio.com.br/2022/01/05/uso-impessoal-dos-verbos-haver-fazer-e-ter-ou-seja-quando-sao-usados-sempre-na-terceira-pessoa-do-singular/">Uso impessoal dos verbos HAVER, FAZER e TER</a></li>
+	<li id="menu-item-4442" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4442"><a href="https://portuguessemmisterio.com.br/2020/05/19/entregado-ou-entregue-aceitado-ou-aceito-pagado-ou-pago-ganhado-ou-ganho-quando-usar-o-participio-regular-e-quando-usar-o-participio-irregular/">Particípio regular e particípio irregular</a></li>
+	<li id="menu-item-4179" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4179"><a href="https://portuguessemmisterio.com.br/2019/08/13/nem-eu-nem-voce-pode-ou-podemos-dar-outra-volta-no-lago-casos-dificeis-de-concordancia-verbal/">Concordância verbal &#8211; casos difíceis</a></li>
+	<li id="menu-item-4152" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4152"><a href="https://portuguessemmisterio.com.br/2019/08/02/virgula-no-lugar-de-verbo-subentendido-obrigatoria-ou-opcional/">Vírgula e verbo subentendido</a></li>
+	<li id="menu-item-601" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-601"><a href="https://portuguessemmisterio.com.br/2015/07/16/a-virgula-do-vocativo/">A vírgula do vocativo</a></li>
+	<li id="menu-item-3046" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3046"><a href="https://portuguessemmisterio.com.br/2018/03/10/por-que-porque-porque-ou-por-que/">Por que, porque, porquê ou por quê</a></li>
+	<li id="menu-item-3520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3520"><a href="https://portuguessemmisterio.com.br/2018/07/12/quando-usar-o-pronome-lhe/">Quando usar o pronome &#8220;lhe&#8221;</a></li>
+	<li id="menu-item-3245" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3245"><a href="https://portuguessemmisterio.com.br/2018/04/22/crase-1-conceito-2-quando-nao-usar-crase/">CRASE. 1) Conceito. 2) Quando não usar</a></li>
+	<li id="menu-item-3324" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3324"><a href="https://portuguessemmisterio.com.br/2018/05/18/crase-antes-de-horas-abre-as-9h-ou-as-9hate-as-22h-ou-ate-as-22h-apos-as-19h-ou-apos-as-19h/">CRASE. 3) antes de horas</a></li>
+	<li id="menu-item-3365" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3365"><a href="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-pronome-possessivo-sua-minha-nossa/">CRASE. 8) Antes de pronome possessivo</a></li>
+	<li id="menu-item-3334" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3334"><a href="https://portuguessemmisterio.com.br/2018/05/23/crase-antes-de-nomes-proprios-geograficos/">CRASE. 4) antes de nomes próprios geográficos</a></li>
+	<li id="menu-item-3345" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3345"><a href="https://portuguessemmisterio.com.br/2018/05/28/crase-antes-de-locucoes-prepositivas/">CRASE. 5) antes de locução prepositiva</a></li>
+	<li id="menu-item-3352" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3352"><a href="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-nomes-de-mulheres/">CRASE. 6) Antes de nomes de mulher</a></li>
+	<li id="menu-item-3361" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3361"><a href="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-locucoes-adverbiais-de-circunstancia/">CRASE. 7) Antes de locução adverbial de circunstância</a></li>
+	<li id="menu-item-3403" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3403"><a href="https://portuguessemmisterio.com.br/2018/06/19/este-ou-esse-esta-ou-essa-isto-ou-isso-neste-ou-nesse/">Este ou esse?</a></li>
+	<li id="menu-item-3382" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3382"><a href="https://portuguessemmisterio.com.br/2018/06/18/ela-mesmo-fez-ou-ela-mesma-fez/">Ela mesmo ou Ela mesma?</a></li>
+	<li id="menu-item-3266" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3266"><a href="https://portuguessemmisterio.com.br/2018/04/25/demais-ou-de-mais-2/">Nada demais ou Nada de mais?</a></li>
+	<li id="menu-item-3393" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3393"><a href="https://portuguessemmisterio.com.br/2018/06/19/se-nao-ou-senao/">Se não x Senão</a></li>
+	<li id="menu-item-3292" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3292"><a href="https://portuguessemmisterio.com.br/2018/04/27/virgula-quando-usar-e-quando-nao-usar/">Vírgula &#8211; quando usar</a></li>
+	<li id="menu-item-3274" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3274"><a href="https://portuguessemmisterio.com.br/2018/04/25/flexao-do-infinitivo-2/">Flexão do infinitivo (resumo)</a></li>
+	<li id="menu-item-3239" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3239"><a href="https://portuguessemmisterio.com.br/2018/04/21/palavras-compostas-definicao-exemplos-plural/">Palavras compostas</a></li>
+	<li id="menu-item-3229" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3229"><a href="https://portuguessemmisterio.com.br/2018/04/20/quando-que-leva-acento-2/">Quando &#8220;que&#8221; leva acento</a></li>
+	<li id="menu-item-3092" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3092"><a href="https://portuguessemmisterio.com.br/2018/03/25/acentos-diferenciais-que-nao-existem-mais-em-decorrencia-do-novo-acordo-ortografico/">Acentos diferenciais</a></li>
+	<li id="menu-item-4058" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4058"><a href="https://portuguessemmisterio.com.br/2019/07/09/regencia-do-verbo-preferir/">Regência do verbo PREFERIR</a></li>
+	<li id="menu-item-3050" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3050"><a href="https://portuguessemmisterio.com.br/2017/10/29/convidar-lhes-ou-convida-los/">Regência do verbo CONVIDAR</a></li>
+	<li id="menu-item-3585" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3585"><a href="https://portuguessemmisterio.com.br/2018/08/06/regencia-do-verbo-atender/">Regência do verbo ATENDER</a></li>
+	<li id="menu-item-3030" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3030"><a href="https://portuguessemmisterio.com.br/2018/03/09/paguei-o-vendedor-ou-paguei-ao-vendedor-paguei-a-empregada-ou-paguei-a-empregada-regencia-verbal-do-verbo-pagar/">Regência do verbo PAGAR</a></li>
+	<li id="menu-item-3016" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3016"><a href="https://portuguessemmisterio.com.br/2018/03/07/agradeco-ao-professor-ou-agradeco-o-professor-agradeco-a-professora-ou-agradeco-a-professora-agradeco-a-todos-agradeco-todos-ou-agradeco-a-todos/">Regência do verbo AGRADECER</a></li>
+	<li id="menu-item-2813" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2813"><a href="https://portuguessemmisterio.com.br/2017/12/22/quando-usar-virgula-antes-de-que/">Quando usar vírgula antes de QUE</a></li>
+	<li id="menu-item-2801" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2801"><a href="https://portuguessemmisterio.com.br/2017/12/18/regras-dos-prefixos-no-novo-acordo-ortografico/">Regras dos prefixos</a></li>
+	<li id="menu-item-2587" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2587"><a href="https://portuguessemmisterio.com.br/2017/09/05/flexao-do-infinitivo/">Flexão do infinitivo</a></li>
+	<li id="menu-item-2263" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2263"><a href="https://portuguessemmisterio.com.br/2017/01/30/conjuncoes-alternativas/">Conjunções alternativas</a></li>
+	<li id="menu-item-1621" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1621"><a href="https://portuguessemmisterio.com.br/2015/12/04/por-que-o-diminutivo-de-casa-e-casinha-com-s-e-o-de-pe-e-pezinho-com-z/">Por que o diminutivo de CASA é caSinha e o de PÉ é peZinho?</a></li>
+	<li id="menu-item-1500" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1500"><a href="https://portuguessemmisterio.com.br/2015/11/26/virgulas-com-nomes-de-pessoas/">Vírgulas com nomes de pessoas</a></li>
+	<li id="menu-item-1448" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1448"><a href="https://portuguessemmisterio.com.br/2015/11/24/concordancia-verbal-casos-especiais/">Concordância verbal – casos especiais</a></li>
+	<li id="menu-item-1394" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1394"><a href="https://portuguessemmisterio.com.br/2015/11/22/concordancia-nominal-substantivo-com-valor-de-adjetivo/">Substantivo com valor de adjetivo</a></li>
+	<li id="menu-item-1370" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1370"><a href="https://portuguessemmisterio.com.br/2015/11/19/concordancia-com-fracoes/">Concordância com frações</a></li>
+	<li id="menu-item-1141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1141"><a href="https://portuguessemmisterio.com.br/2015/10/21/funcoes-da-palavra-que/">Funções da palavra QUE</a></li>
+	<li id="menu-item-1126" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1126"><a href="https://portuguessemmisterio.com.br/2015/10/19/oracoes-subordinadas-adjetivas/">Orações subordinadas adjetivas</a></li>
+	<li id="menu-item-1021" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1021"><a href="https://portuguessemmisterio.com.br/2015/08/31/plural-das-cores/">Plural da CORES</a></li>
+	<li id="menu-item-943" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-943"><a href="https://portuguessemmisterio.com.br/2015/08/13/o-pronome-cujo/">CUJO</a></li>
+	<li id="menu-item-918" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-918"><a href="https://portuguessemmisterio.com.br/2015/08/07/regencia-verbal/">Regência Verbal</a></li>
+	<li id="menu-item-901" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-901"><a href="https://portuguessemmisterio.com.br/2015/08/05/preposicao-antes-de-pronome-relativo/">Preposição antes de pronome relativo</a></li>
+	<li id="menu-item-776" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-776"><a href="https://portuguessemmisterio.com.br/2015/07/23/bem-feito-bem-feito-e-benfeito/">Bem feito, bem-feito e benfeito</a></li>
+	<li id="menu-item-675" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-675"><a href="https://portuguessemmisterio.com.br/2015/07/20/o-hifen-de-bem-e-de-mal/">O hífen de BEM e de MAL</a></li>
+	<li id="menu-item-655" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-655"><a href="https://portuguessemmisterio.com.br/2015/07/19/virgula-entre-sujeito-e-predicado/">Vírgula entre sujeito e predicado</a></li>
+	<li id="menu-item-642" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-642"><a href="https://portuguessemmisterio.com.br/2015/07/17/oracoes-coordenadas/">Orações coordenadas</a></li>
+	<li id="menu-item-573" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-573"><a href="https://portuguessemmisterio.com.br/2015/07/15/tudo-sao-flores-ou-tudo-e-flores/">Tudo são flores ou Tudo é flores?</a></li>
+	<li id="menu-item-542" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-542"><a href="https://portuguessemmisterio.wordpress.com/2015/07/13/quando-usar-virgula-antes-de-gerundio/">Quando usar vírgula antes de GERÚNDIO</a></li>
+	<li id="menu-item-375" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-375"><a href="https://portuguessemmisterio.wordpress.com/2015/07/08/adjetivo-com-valor-de-adverbio/">Adjetivo com valor de advérbio</a></li>
+	<li id="menu-item-353" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-353"><a href="https://portuguessemmisterio.wordpress.com/2015/07/07/indicacoes-de-tempo-ha-faz-atras-havia-fazia-daqui-a-a/">Indicações de tempo: há, faz, atrás, havia, fazia, daqui a, a</a></li>
+	<li id="menu-item-337" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-337"><a href="https://portuguessemmisterio.wordpress.com/2015/07/07/participios/">Particípios</a></li>
+	<li id="menu-item-326" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-326"><a href="https://portuguessemmisterio.wordpress.com/2015/07/06/colocacao-pronominal/">Colocação pronominal</a></li>
+	<li id="menu-item-294" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-294"><a href="https://portuguessemmisterio.wordpress.com/2015/07/06/uso-impessoal-dos-verbos-haver-fazer-e-ter/">Uso impessoal dos verbos HAVER, FAZER e TER</a></li>
+	<li id="menu-item-178" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-178"><a href="https://portuguessemmisterio.wordpress.com/2015/06/28/crase/">CRASE</a></li>
+	<li id="menu-item-155" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-155"><a href="https://portuguessemmisterio.wordpress.com/2015/06/26/onde-x-aonde/">Onde x Aonde</a></li>
+	<li id="menu-item-122" class="menu-item menu-item-type-post_type menu-item-object-post menu-item-122"><a href="https://portuguessemmisterio.com.br/2015/06/25/como-e-mesmo/">MESMO</a></li>
+	<li id="menu-item-115" class="menu-item menu-item-type-post_type menu-item-object-post menu-item-115"><a href="https://portuguessemmisterio.com.br/2015/06/25/este-ou-esse/">Este ou Esse? Esta ou Essa? Isto ou Isso? Neste ou Nesse?</a></li>
+	<li id="menu-item-106" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-106"><a href="https://portuguessemmisterio.wordpress.com/2015/06/25/novo-acordo-ortografico/">Novo Acordo Ortográfico</a></li>
+	<li id="menu-item-95" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-95"><a href="https://portuguessemmisterio.wordpress.com/2015/06/24/os-quatro-porques/">Os quatro porquês</a></li>
+</ul>
+</li>
+<li id="menu-item-90" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-90"><a href="https://portuguessemmisterio.com.br/category/dificuldades-da-lingua-portuguesa/">Dificuldades da língua</a>
+<ul class="sub-menu">
+	<li id="menu-item-4398" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4398"><a href="https://portuguessemmisterio.com.br/2020/05/13/extender-ou-estender-extendido-ou-estendido-extensao-ou-estensao-2/">Extender ou estender?</a></li>
+	<li id="menu-item-4387" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4387"><a href="https://portuguessemmisterio.com.br/2020/05/04/a-fora-ou-afora/">A fora ou Afora?</a></li>
+	<li id="menu-item-4324" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4324"><a href="https://portuguessemmisterio.com.br/2020/04/03/encubacao-ou-incubacao-encubar-ou-incubar/">Encubação ou incubação?</a></li>
+	<li id="menu-item-4244" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4244"><a href="https://portuguessemmisterio.com.br/2019/10/31/inepto-ou-inapto-inepcia-ou-inaptidao/">Inapto x Inepto</a></li>
+	<li id="menu-item-4216" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4216"><a href="https://portuguessemmisterio.com.br/2019/09/25/acerca-de-a-cerca-de-ou-ha-cerca-de/">&#8220;Acerca de&#8221;, &#8220;A cerca de&#8221;</a></li>
+	<li id="menu-item-4135" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4135"><a href="https://portuguessemmisterio.com.br/2019/07/29/tiver-ou-estiver/">Tiver ou estiver?</a></li>
+	<li id="menu-item-4122" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4122"><a href="https://portuguessemmisterio.com.br/2019/07/26/traz-ou-tras/">Traz ou trás?</a></li>
+	<li id="menu-item-4112" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4112"><a href="https://portuguessemmisterio.com.br/2019/07/25/por-hora-ou-por-ora/">Tachar ou Taxar?</a></li>
+	<li id="menu-item-4102" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4102"><a href="https://portuguessemmisterio.com.br/2019/07/25/por-hora-ou-por-ora/">Por hora ou por ora?</a></li>
+	<li id="menu-item-4091" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4091"><a href="https://portuguessemmisterio.com.br/2019/07/24/por-ou-por-por-do-sol-ou-por-do-sol/">Por ou Pôr?</a></li>
+	<li id="menu-item-4078" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4078"><a href="https://portuguessemmisterio.com.br/2019/07/22/tao-pouco-ou-tampouco/">Tão pouco ou tampouco?</a></li>
+	<li id="menu-item-4008" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4008"><a href="https://portuguessemmisterio.com.br/2019/05/13/falta-ou-faltam-dez-dias-falta-ou-faltam-duas-pessoas-falta-ou-faltam-resolver-duas-questoes/">Falta ou faltam?</a></li>
+	<li id="menu-item-3948" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3948"><a href="https://portuguessemmisterio.com.br/2019/04/04/destratar-ou-distratar-destrato-ou-distrato/">Destratar ou distratar</a></li>
+	<li id="menu-item-3933" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3933"><a href="https://portuguessemmisterio.com.br/2019/03/14/fato-destorcido-ou-fato-distorcido-destorcer-ou-distorcer/">Destorcer ou distorcer?</a></li>
+	<li id="menu-item-3903" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3903"><a href="https://portuguessemmisterio.com.br/2019/03/08/tempo-dispendido-ou-tempo-despendido-dispender-ou-despender/">Tempo dispendido ou tempo despendido?</a></li>
+	<li id="menu-item-537" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-537"><a href="https://portuguessemmisterio.wordpress.com/2015/07/13/mau-x-mal/">MAU x MAL</a></li>
+	<li id="menu-item-3612" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3612"><a href="https://portuguessemmisterio.com.br/2018/08/20/dolorido-ou-doloroso/">Dolorido ou doloroso?</a></li>
+	<li id="menu-item-3515" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3515"><a href="https://portuguessemmisterio.com.br/2018/07/12/pedir-para-pedir-para-que-ou-pedir-que/">Pedir para”, “pedir para que” ou “pedir que”?</a></li>
+	<li id="menu-item-3484" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3484"><a href="https://portuguessemmisterio.com.br/2018/06/29/ela-se-maqueia-ou-se-maquia-ele-intermedia-ou-intermedeia/">Ela se maqueia ou se maquia?  Ele intermedia ou intermedeia?</a></li>
+	<li id="menu-item-3460" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3460"><a href="https://portuguessemmisterio.com.br/2018/06/27/em-cima-ou-encima/">Em cima ou Encima?</a></li>
+	<li id="menu-item-3451" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3451"><a href="https://portuguessemmisterio.com.br/2018/06/25/embaixo-ou-em-baixo/">Embaixo ou em baixo?</a></li>
+	<li id="menu-item-3100" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3100"><a href="https://portuguessemmisterio.com.br/2018/03/28/e-masculino-ou-feminino-vinte-e-tres-substantivos-cujo-genero-gera-confusao/">É masculino ou feminino?</a></li>
+	<li id="menu-item-3073" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3073"><a href="https://portuguessemmisterio.com.br/2018/03/22/a-medida-que-x-na-medida-em-que-2/">À medida que x Na medida em que</a></li>
+	<li id="menu-item-2975" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2975"><a href="https://portuguessemmisterio.com.br/2018/02/22/qual-o-plural-de-sem-terra-sem-teto-sem-sal-sem-vergonha-sem-trabalho-sem-dinheiro/">Plural de sem-terra, sem-teto, sem-sal, sem-vergonha</a></li>
+	<li id="menu-item-2829" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2829"><a href="https://portuguessemmisterio.com.br/2017/12/29/como-usar-cerca-de-perto-de-com-o-sentido-aproximadamente/">Como usar “cerca de” com o sentido “aproximadamente</a></li>
+	<li id="menu-item-2642" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2642"><a href="https://portuguessemmisterio.com.br/2017/11/29/a-diante-a-diante-ou-adiante/">À diante, a diante ou adiante?</a></li>
+	<li id="menu-item-2629" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2629"><a href="https://portuguessemmisterio.com.br/2017/11/21/abaixar-ou-baixar/">Abaixar x Baixar</a></li>
+	<li id="menu-item-2521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2521"><a href="https://portuguessemmisterio.com.br/2017/05/23/ao-ponto-de-ou-a-ponto-de/">Ao ponto de ou A ponto de?</a></li>
+	<li id="menu-item-2456" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2456"><a href="https://portuguessemmisterio.com.br/2017/04/10/quem-nasce-no-acre-e-acreano-ou-acriano/">Quem nasce no Acre é acreano ou acriano?</a></li>
+	<li id="menu-item-2432" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2432"><a href="https://portuguessemmisterio.com.br/2017/03/14/pre-aqueca-o-forno-a-180-graus-ou-preaqueca-o-forno-a-180-graus/">Pré-aqueça ou Preaqueça?</a></li>
+	<li id="menu-item-2369" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2369"><a href="https://portuguessemmisterio.com.br/2017/03/06/ao-mesmo-tempo-em-que-ou-ao-mesmo-tempo-que/">Ao mesmo tempo em que ou Ao mesmo tempo que?</a></li>
+	<li id="menu-item-2044" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2044"><a href="https://portuguessemmisterio.com.br/2016/11/30/todos-ou-todos-os/">Todos ou Todos os</a></li>
+	<li id="menu-item-2043" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2043"><a href="https://portuguessemmisterio.com.br/2016/11/25/ambos-ou-ambos-os/">Ambos ou Ambos os</a></li>
+	<li id="menu-item-1885" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1885"><a href="https://portuguessemmisterio.com.br/2016/10/20/haja-visto-ou-haja-vista/">Haja visto ou Haja vista?</a></li>
+	<li id="menu-item-1846" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1846"><a href="https://portuguessemmisterio.com.br/2016/09/30/toda-poderosa-ou-todo-poderosa/">Toda-poderosa ou todo-poderosa?</a></li>
+	<li id="menu-item-1668" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1668"><a href="https://portuguessemmisterio.com.br/2016/02/23/eu-me-lembro-disso-ou-eu-lembro-isso/">Eu me lembro disso ou Eu lembro isso</a></li>
+	<li id="menu-item-1659" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1659"><a href="https://portuguessemmisterio.com.br/2016/02/18/o-preco-esta-caro-ou-o-preco-esta-alto/">Preço caro ou Preco alto?</a></li>
+	<li id="menu-item-1653" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1653"><a href="https://portuguessemmisterio.com.br/2016/02/18/meio-ou-meia/">Meio ou Meia</a></li>
+	<li id="menu-item-1463" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1463"><a href="https://portuguessemmisterio.com.br/2015/11/25/nenhum-nem-um/">Nenhum x Nem um</a></li>
+	<li id="menu-item-1382" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1382"><a href="https://portuguessemmisterio.com.br/2015/11/19/duzentos-gramas-ou-duzentas-gramas/">Duzentos gramas ou Duzentas gramas?</a></li>
+	<li id="menu-item-1260" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1260"><a href="https://portuguessemmisterio.com.br/2015/11/13/anexo-em-anexo/">Anexo / Em Anexo</a></li>
+	<li id="menu-item-1204" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1204"><a href="https://portuguessemmisterio.com.br/2015/11/11/e-proibido-a-entrada-ou-e-proibida-a-entrada/">É proibido a entrada ou É proibida a entrada?</a></li>
+	<li id="menu-item-1186" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1186"><a href="https://portuguessemmisterio.com.br/2015/11/03/ao-nivel-de-em-nivel-de-a-nivel-de/">Ao nível de / Em nível de / A nível de</a></li>
+	<li id="menu-item-1151" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1151"><a href="https://portuguessemmisterio.com.br/2015/10/23/obrigado-ou-obrigada/">Obrigado ou Obrigada?</a></li>
+	<li id="menu-item-1107" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1107"><a href="https://portuguessemmisterio.com.br/2015/10/13/parabens-atrasado-ou-parabens-atrasados/">Parabéns atrasado ou Parabéns atrasados?</a></li>
+	<li id="menu-item-1093" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1093"><a href="https://portuguessemmisterio.com.br/2015/09/28/a-moral-x-o-moral/">A moral x O moral</a></li>
+	<li id="menu-item-1066" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1066"><a href="https://portuguessemmisterio.com.br/2015/09/24/as-milhares-de-pessoas-ou-os-milhares-de-pessoas/">As milhares ou Os milhares?</a></li>
+	<li id="menu-item-1050" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1050"><a href="https://portuguessemmisterio.com.br/2015/09/21/15-milhoes-de-reais-ou-15-milhao-de-reais/">1,5 milhões ou 1,5 milhão?</a></li>
+	<li id="menu-item-994" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-994"><a href="https://portuguessemmisterio.com.br/2015/08/20/ele-vive-a-custa-do-pai-ou-ele-vive-as-custas-do-pai/">À custa de ou Às custas de?</a></li>
+	<li id="menu-item-979" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-979"><a href="https://portuguessemmisterio.com.br/2015/08/18/porventura-e-por-ventura/">Porventura e Por ventura</a></li>
+	<li id="menu-item-927" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-927"><a href="https://portuguessemmisterio.com.br/2015/08/12/bom-dia-e-bom-dia/">Bom dia e Bom-dia</a></li>
+	<li id="menu-item-878" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-878"><a href="https://portuguessemmisterio.com.br/2015/08/03/a-regencia-de-apologia/">&#8220;Apologia a&#8221; ou &#8220;Apologia de&#8221;?</a></li>
+	<li id="menu-item-789" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-789"><a href="https://portuguessemmisterio.com.br/2015/07/23/bem-vindo-ou-bem-vindo/">Bem vindo ou Bem-vindo?</a></li>
+	<li id="menu-item-629" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-629"><a href="https://portuguessemmisterio.com.br/2015/07/17/tratam-se-ou-trata-se-de-documentos-importantes/">Tratam-se ou Trata-se de documentos importantes?</a></li>
+	<li id="menu-item-620" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-620"><a href="https://portuguessemmisterio.com.br/2015/07/17/aluga-se-ou-alugam-se-apartamentos/">Aluga-se ou Alugam-se apartamentos?</a></li>
+	<li id="menu-item-593" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-593"><a href="https://portuguessemmisterio.com.br/2015/07/16/dar-a-luz-a-um-bebe-ou-dar-a-luz-um-bebe/">Dar à luz a um bebê ou Dar à luz um bebê?</a></li>
+	<li id="menu-item-561" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-561"><a href="https://portuguessemmisterio.com.br/2015/07/14/quaisquer-questionarperguntar-a-partir-dedesde/">Quaisquer – Questionar/Perguntar – A partir de/Desde</a></li>
+	<li id="menu-item-552" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-552"><a href="https://portuguessemmisterio.wordpress.com/2015/07/13/tampoucotao-pouco-tachartaxar/">Tampouco/Tão pouco – Tachar/Taxar</a></li>
+	<li id="menu-item-443" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-443"><a href="https://portuguessemmisterio.wordpress.com/2015/07/10/para-mim-ou-para-eu/">Para mim ou Para eu?</a></li>
+	<li id="menu-item-438" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-438"><a href="https://portuguessemmisterio.wordpress.com/2015/07/10/acerca-de-a-cerca-de-ha-cerca-de/">Acerca de – A cerca de – Há cerca de</a></li>
+	<li id="menu-item-429" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-429"><a href="https://portuguessemmisterio.wordpress.com/2015/07/10/ao-encontro-dede-encontro-a-afima-fim/">Ao encontro de/De encontro a  –  Afim/A fim</a></li>
+	<li id="menu-item-411" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-411"><a href="https://portuguessemmisterio.wordpress.com/2015/07/09/falta-dez-dias-ou-faltam-dez-dias/">Falta 10 dias ou Faltam 10 dias?</a></li>
+	<li id="menu-item-343" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-343"><a href="https://portuguessemmisterio.wordpress.com/2015/07/07/verbos-terminados-em-iar/">Ela se maquia ou se maqueia?</a></li>
+	<li id="menu-item-316" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-316"><a href="https://portuguessemmisterio.wordpress.com/2015/07/06/ver-x-vir/">VER x VIR</a></li>
+	<li id="menu-item-310" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-310"><a href="https://portuguessemmisterio.wordpress.com/2015/07/06/a-ver-x-haver/">A VER x HAVER</a></li>
+	<li id="menu-item-287" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-287"><a href="https://portuguessemmisterio.wordpress.com/2015/07/01/embaixoem-baixo-em-cimaencima/">Embaixo/Em baixo – Em cima/Encima</a></li>
+	<li id="menu-item-279" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-279"><a href="https://portuguessemmisterio.wordpress.com/2015/07/01/entre-ou-dentre/">Entre x Dentre</a></li>
+	<li id="menu-item-273" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-273"><a href="https://portuguessemmisterio.wordpress.com/2015/07/01/a-medida-que-x-na-medida-em-que/">À medida que x Na medida em que</a></li>
+	<li id="menu-item-266" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-266"><a href="https://portuguessemmisterio.wordpress.com/2015/07/01/demais-x-de-mais/">Demais x De mais</a></li>
+	<li id="menu-item-211" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-211"><a href="https://portuguessemmisterio.wordpress.com/2015/06/29/por-orapor-hora-porpor-traztras-estiver-tiver/">Por ora/Por hora – Pôr/Por – Traz/Trás – Estiver/ Tiver</a></li>
+	<li id="menu-item-162" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-162"><a href="https://portuguessemmisterio.wordpress.com/2015/06/26/se-nao-x-senao/">Se não x Senão</a></li>
+	<li id="menu-item-93" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-93"><a href="https://portuguessemmisterio.wordpress.com/2015/06/23/todo-o-a-principio-x-em-principio-ao-inves-de-x-em-vez-de/">Todo [0] &#8211;  Ao invés de &#8211; Em/A princípio</a></li>
+	<li id="menu-item-94" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-94"><a href="https://portuguessemmisterio.wordpress.com/2015/06/22/falsos-sinonimos/">Falsos sinônimos</a></li>
+</ul>
+</li>
+<li id="menu-item-1008" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-1008"><a href="https://portuguessemmisterio.com.br/category/ortografia/">Ortografia</a>
+<ul class="sub-menu">
+	<li id="menu-item-4466" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4466"><a href="https://portuguessemmisterio.com.br/2020/05/23/freiar-ou-frear-freiando-ou-freando-freiado-ou-freado/">Freiar ou frear?</a></li>
+	<li id="menu-item-4194" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4194"><a href="https://portuguessemmisterio.com.br/2019/08/21/extender-ou-estender-extendido-ou-estendido-extensao-ou-estensao/">Extender ou estender?</a></li>
+	<li id="menu-item-192" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-192"><a href="https://portuguessemmisterio.wordpress.com/2015/06/29/paronimos-palavras-parecidas-na-grafia/">Parônimos</a></li>
+	<li id="menu-item-895" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-895"><a href="https://portuguessemmisterio.com.br/2015/08/05/pizza-de-mussarela-ou-mucarela/">Mussarela ou muçarela?</a></li>
+	<li id="menu-item-1005" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1005"><a href="https://portuguessemmisterio.com.br/2015/08/24/agua-de-coco-ou-agua-de-coco/">Água de côco ou Água de coco?</a></li>
+	<li id="menu-item-871" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-871"><a href="https://portuguessemmisterio.com.br/2015/07/31/aterrisar-aterrizar-ou-aterrissar/">Aterrizar ou Aterrissar?</a></li>
+	<li id="menu-item-863" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-863"><a href="https://portuguessemmisterio.com.br/2015/07/31/beneficiente-ou-beneficente/">Beneficiente ou beneficente?</a></li>
+	<li id="menu-item-2683" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2683"><a href="https://portuguessemmisterio.com.br/2017/12/05/multi-uso-multiuso-ou-multiuso-re-uso-reuso-ou-reuso/">Multi-uso, multiuso ou multiúso? Re-uso, Reuso ou reúso?</a></li>
+	<li id="menu-item-2766" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2766"><a href="https://portuguessemmisterio.com.br/2017/12/15/conta-corrente-ou-conta-corrente/">Conta-corrente ou conta corrente?</a></li>
+	<li id="menu-item-2536" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2536"><a href="https://portuguessemmisterio.com.br/2017/06/16/os-deficits-ou-os-deficit-os-superavits-ou-os-superavit/">Deficit e Superavit</a></li>
+	<li id="menu-item-1709" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1709"><a href="https://portuguessemmisterio.com.br/2016/05/30/compania-ou-companhia/">Compania ou Companhia?</a></li>
+	<li id="menu-item-1482" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1482"><a target="_blank" rel="noopener" href="https://portuguessemmisterio.com.br/2015/11/26/voce-sabe-a-pronuncia-correta-destas-palavras/">Pronúncia: recorde, gratuito, subsídio, etc.</a></li>
+	<li id="menu-item-1174" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1174"><a href="https://portuguessemmisterio.com.br/2015/11/01/acentos-diferenciais/">Acentos Diferenciais</a></li>
+	<li id="menu-item-1087" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1087"><a href="https://portuguessemmisterio.com.br/2015/09/25/estoria-ou-historia/">Estória ou história?</a></li>
+</ul>
+</li>
+<li id="menu-item-92" class="menu-item menu-item-type-taxonomy menu-item-object-category current-post-ancestor current-menu-ancestor current-menu-parent current-custom-parent menu-item-has-children menu-item-92"><a href="https://portuguessemmisterio.com.br/category/redacao/">Redação</a>
+<ul class="sub-menu">
+	<li id="menu-item-3314" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3314"><a href="https://portuguessemmisterio.com.br/2018/05/04/travessoes-e-parenteses-quando-usar-travessao-nao-e-hifen/">Travessões e Parênteses</a></li>
+	<li id="menu-item-3209" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3209"><a href="https://portuguessemmisterio.com.br/2018/04/18/aspectos-estilisticos-7-termos-desnecessarios-enxugando-frases/">Aspectos estilísticos – 7-Termos desnecessários</a></li>
+	<li id="menu-item-3196" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3196"><a href="https://portuguessemmisterio.com.br/2018/04/18/aspectos-estilisticos-6-cliche/">Aspectos estilísticos – 6-Clichê</a></li>
+	<li id="menu-item-3181" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3181"><a href="https://portuguessemmisterio.com.br/2018/04/18/aspectos-estilisticos-5-estrangeirismo/">Aspectos estilísticos – 5-Estrangeirismo</a></li>
+	<li id="menu-item-3162" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3162"><a href="https://portuguessemmisterio.com.br/2018/04/16/aspectos-estilisticos-4-pleonasmo/">Aspectos estilísticos – 4-Pleonasmo</a></li>
+	<li id="menu-item-3155" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3155"><a href="https://portuguessemmisterio.com.br/2018/04/16/aspectos-estilisticos-3-ambiguidade/">Aspectos estilísticos – 3-Ambiguidade</a></li>
+	<li id="menu-item-3146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3146"><a href="https://portuguessemmisterio.com.br/2018/04/16/aspectos-estilisticos-2-repeticao-de-palavras/">Aspectos estilísticos – 2-Repetição de palavras</a></li>
+	<li id="menu-item-3133" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3133"><a href="https://portuguessemmisterio.com.br/2018/04/13/aspectos-estilisticos-1-enfase-quatro-formas-de-dar-enfase-a-informacao-mais-relevante-da-frase/">Aspectos estilísticos – 1-Ênfase</a></li>
+	<li id="menu-item-2395" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2395"><a href="https://portuguessemmisterio.com.br/2017/03/08/a-ambiguidade-dos-pronomes-seu-e-sua/">A ambiguidade de SEU e SUA</a></li>
+	<li id="menu-item-1647" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1647"><a href="https://portuguessemmisterio.com.br/2016/02/16/falar-x-dizer/">Falar x Dizer</a></li>
+	<li id="menu-item-1598" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1598"><a href="https://portuguessemmisterio.com.br/2015/11/30/ponha-as-sentencas-na-forma-positiva/">Ponha as sentenças na forma positiva</a></li>
+	<li id="menu-item-1194" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1194"><a href="https://portuguessemmisterio.com.br/2015/11/09/queismo-o-uso-exagerado-da-palavra-que/">O uso exagerado da palavra QUE</a></li>
+	<li id="menu-item-1114" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1114"><a href="https://portuguessemmisterio.com.br/2015/10/14/a-posicao-do-adjetivo/">A posição do adjetivo</a></li>
+	<li id="menu-item-971" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-971"><a href="https://portuguessemmisterio.com.br/2015/08/17/representacao-de-horas-1530-1530h-ou-15h30/">Representação de Horas</a></li>
+	<li id="menu-item-839" class="menu-item menu-item-type-custom menu-item-object-custom current-menu-item menu-item-839"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" aria-current="page">Quando usar itálico</a></li>
+	<li id="menu-item-833" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-833"><a href="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/">Quando usas aspas</a></li>
+	<li id="menu-item-812" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-812"><a href="https://portuguessemmisterio.com.br/2015/07/24/maiusculas-e-minusculas/">Maiúsculas e minúsculas</a></li>
+	<li id="menu-item-366" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-366"><a href="https://portuguessemmisterio.wordpress.com/2015/07/08/plural-desnecessario/">Plural desnecessário</a></li>
+	<li id="menu-item-267" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-267"><a href="https://portuguessemmisterio.wordpress.com/2015/07/01/como-usar-o-verbo-acontecer/">Como usar o verbo &#8220;acontecer&#8221;</a></li>
+	<li id="menu-item-96" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-96"><a href="https://portuguessemmisterio.wordpress.com/2015/06/24/escolha-verbos-especificos/">Escolha verbos específicos</a></li>
+</ul>
+</li>
+<li id="menu-item-222" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-222"><a href="https://portuguessemmisterio.com.br/category/ferramentas/">Ferramentas</a>
+<ul class="sub-menu">
+	<li id="menu-item-2314" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2314"><a href="https://portuguessemmisterio.com.br/2017/01/31/como-remover-uma-palavra-da-lista-de-correcao-automatica-do-word/">Como remover uma palavra da lista de correção automática do Word</a></li>
+	<li id="menu-item-2276" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2276"><a href="https://portuguessemmisterio.com.br/2017/01/30/dicas-e-atalhos-no-word/">Como converter texto em letras maiúsculas para minúsculas e ATALHOS para o Word</a></li>
+	<li id="menu-item-233" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-233"><a href="https://portuguessemmisterio.wordpress.com/2015/06/30/dicionarios-on-line/">Dicionários on-line</a></li>
+</ul>
+</li>
+<li id="menu-item-248" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-248"><a href="https://portuguessemmisterio.com.br/category/curiosidades/">Curiosidades</a>
+<ul class="sub-menu">
+	<li id="menu-item-3983" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3983"><a href="https://portuguessemmisterio.com.br/2019/04/24/origem-de-algumas-expressoes-curiosas-da-lingua-portuguesa-2/">Origem de 11 expressões curiosas da língua portuguesa</a></li>
+	<li id="menu-item-3975" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3975"><a href="https://portuguessemmisterio.com.br/2019/04/15/termos-de-culinaria-usados-na-comunicacao-do-dia-a-dia/">Termos de culinária usados na comunicação do dia a dia</a></li>
+	<li id="menu-item-3817" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3817"><a href="https://portuguessemmisterio.com.br/2018/10/19/termos-de-corte-e-costura-usados-na-comunicacao-do-dia-a-dia/">Termos de corte e costura usados na comunicação do dia a dia</a></li>
+	<li id="menu-item-2722" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2722"><a href="https://portuguessemmisterio.com.br/2017/12/12/as-palavras-mais-feias-da-lingua-portuguesa/">As palavras mais feias da língua portuguesa</a></li>
+	<li id="menu-item-2696" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2696"><a href="https://portuguessemmisterio.com.br/2017/12/08/as-palavras-mais-engracadas-da-lingua-portuguesa/">As palavras mais engraçadas da língua portuguesa</a></li>
+	<li id="menu-item-2202" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2202"><a href="https://portuguessemmisterio.com.br/2017/01/23/carta-de-guimaraes-rosa-em-que-todas-as-palavras-comecam-com-a-letra-c/">Carta de Guimarães Rosa só com palavras começando por C</a></li>
+	<li id="menu-item-2160" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2160"><a href="https://portuguessemmisterio.com.br/2017/01/18/meia-meia-meia-meia-ou-meia/">Meia, Meia, Meia, Meia ou Meia?</a></li>
+	<li id="menu-item-2147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2147"><a href="https://portuguessemmisterio.com.br/2017/01/18/esta-e-a-historia-de-um-sujeito-que-so-falava-palavras-comecadas-pela-letra-f/">Piada do F</a></li>
+	<li id="menu-item-2141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2141"><a href="https://portuguessemmisterio.com.br/2017/01/18/portugues-e-o-unico-idioma-em-que-se-pode-escrever-um-texto-so-com-palavras-comecando-por-p/">Texto só com palavras começando por P</a></li>
+	<li id="menu-item-1675" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1675"><a href="https://portuguessemmisterio.com.br/2016/03/01/uma-virgula-muda-tudo/">Campanha de 100 anos da ABL &#8211; Vírgula</a></li>
+	<li id="menu-item-1564" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1564"><a target="_blank" rel="noopener" href="https://portuguessemmisterio.com.br/2015/11/29/cacofatos/">Cacófatos</a></li>
+	<li id="menu-item-1518" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1518"><a href="https://portuguessemmisterio.com.br/2015/11/27/dicionario-de-eufemismos/">Dicionário de Eufemismos</a></li>
+	<li id="menu-item-1360" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1360"><a href="https://portuguessemmisterio.com.br/2015/11/19/brasil-x-portugal-diferenca-de-vocabulario/">Brasil x Portugal – diferença de vocabulário</a></li>
+	<li id="menu-item-1335" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1335"><a href="https://portuguessemmisterio.com.br/2015/11/18/expressoes-curiosas-na-lingua-portuguesa-parte-2/">Expressões curiosas na língua portuguesa – parte 2</a></li>
+	<li id="menu-item-249" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-249"><a href="https://portuguessemmisterio.wordpress.com/2015/06/30/origem-de-algumas-expressoes-curiosas-da-lingua-portuguesa/">Expressões curiosas na língua portuguesa &#8211; parte 1</a></li>
+	<li id="menu-item-718" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-718"><a href="https://portuguessemmisterio.com.br/2015/07/22/algumas-expressoes-curiosas-usadas-pelos-portugueses/">Algumas expressões curiosas usadas pelos portugueses</a></li>
+</ul>
+</li>
+<li id="menu-item-1815" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-1815"><a href="https://portuguessemmisterio.com.br/category/palavras/">Palavras</a>
+<ul class="sub-menu">
+	<li id="menu-item-4695" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4695"><a href="https://portuguessemmisterio.com.br/2021/01/04/espirar-ou-expirar/">Espirar ou expirar</a></li>
+	<li id="menu-item-4688" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4688"><a href="https://portuguessemmisterio.com.br/2021/01/04/espectador-ou-expectador/">Espectador ou expectador?</a></li>
+	<li id="menu-item-4666" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4666"><a href="https://portuguessemmisterio.com.br/2020/12/30/precursor-percursor-ou-percussor/">Precursor, percursor ou percussor?</a></li>
+	<li id="menu-item-4549" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4549"><a href="https://portuguessemmisterio.com.br/2020/06/05/serracao-ou-cerracao/">Serração ou Cerração?</a></li>
+	<li id="menu-item-4541" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4541"><a href="https://portuguessemmisterio.com.br/2020/06/04/contagioso-ou-contagiante-qual-a-diferenca-entre-essas-palavras/">Contagioso ou Contagiante?</a></li>
+	<li id="menu-item-4535" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4535"><a href="https://portuguessemmisterio.com.br/2020/06/04/conjectura-ou-conjuntura-qual-o-significado-dessas-palavras/">Conjectura ou conjuntura?</a></li>
+	<li id="menu-item-4510" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4510"><a href="https://portuguessemmisterio.com.br/2020/06/02/eminente-ou-iminente/">Eminente ou iminente?</a></li>
+	<li id="menu-item-4496" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4496"><a href="https://portuguessemmisterio.com.br/2020/05/29/sessao-secao-ou-cessao/">Sessão, Seção ou Cessão?</a></li>
+	<li id="menu-item-4487" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4487"><a href="https://portuguessemmisterio.com.br/2020/05/29/colocar-em-cheque-ou-em-xeque-por-em-cheque-ou-em-xeque/">Cheque ou xeque?</a></li>
+	<li id="menu-item-4477" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4477"><a href="https://portuguessemmisterio.com.br/2020/05/28/posar-ou-pousar-posam-ou-pousam/">Posar ou pousar?</a></li>
+	<li id="menu-item-4472" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4472"><a href="https://portuguessemmisterio.com.br/2020/05/27/retificar-ou-ratificar-retificacao-ou-ratificacao/">Retificar ou ratificar?</a></li>
+	<li id="menu-item-4455" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4455"><a href="https://portuguessemmisterio.com.br/2020/05/22/extrato-ou-estrato/">Extrato ou Estrato?</a></li>
+	<li id="menu-item-4447" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4447"><a href="https://portuguessemmisterio.com.br/2020/05/21/diferir-ou-deferir/">Diferir ou deferir?</a></li>
+	<li id="menu-item-4430" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4430"><a href="https://portuguessemmisterio.com.br/2020/05/18/comprimento-ou-cumprimento/">Comprimento ou Cumprimento?</a></li>
+	<li id="menu-item-4418" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4418"><a href="https://portuguessemmisterio.com.br/2020/05/16/infligir-ou-infringir/">Infligir ou Infringir?</a></li>
+	<li id="menu-item-4414" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4414"><a href="https://portuguessemmisterio.com.br/2020/05/15/mandato-ou-mandado/">Mandato ou mandado?</a></li>
+	<li id="menu-item-4407" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4407"><a href="https://portuguessemmisterio.com.br/2020/05/14/insipiente-ou-incipiente/">Insipiente ou incipiente?</a></li>
+	<li id="menu-item-4403" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4403"><a href="https://portuguessemmisterio.com.br/2020/05/13/aferir-ou-auferir/">Aferir ou Auferir?</a></li>
+	<li id="menu-item-4393" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4393"><a href="https://portuguessemmisterio.com.br/2020/05/12/dispensa-ou-despensa/">Dispensa ou despensa?</a></li>
+	<li id="menu-item-4380" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4380"><a href="https://portuguessemmisterio.com.br/2020/04/29/absolver-ou-absorver/">Absolver ou Absorver?</a></li>
+	<li id="menu-item-4343" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4343"><a href="https://portuguessemmisterio.com.br/2020/04/04/surto-epidemia-pandemia-e-endemia-entenda-a-diferenca-entre-esses-termos/">Surto, epidemia, pandemia e endemia</a></li>
+	<li id="menu-item-2786" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2786"><a href="https://portuguessemmisterio.com.br/2017/12/18/prezar-ou-primar/">Prezar ou primar?</a></li>
+	<li id="menu-item-2773" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2773"><a href="https://portuguessemmisterio.com.br/2017/12/18/antartida-ou-antartica/">Antárdida ou Antártica?</a></li>
+	<li id="menu-item-2737" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2737"><a href="https://portuguessemmisterio.com.br/2017/12/13/adjetivos-patrios-brasileiros/">Adjetivos pátrios brasileiros</a></li>
+	<li id="menu-item-2751" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2751"><a href="https://portuguessemmisterio.com.br/2017/12/14/palavras-aportuguesadas/">Palavras aportuguesadas</a></li>
+	<li id="menu-item-2133" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2133"><a href="https://portuguessemmisterio.com.br/2017/01/17/homicidio-culposo-a-tv-eternamente-ensinando-o-que-o-senso-comum-nao-assimila/">Homicídio doloso x homicídio culposo</a></li>
+	<li id="menu-item-2099" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2099"><a href="http://Confira%20algumas%20palavras%20que%20têm%20carga%20negativa%20e%20como%20substituí-las.">Palavras com carga negativa</a></li>
+	<li id="menu-item-2089" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2089"><a href="https://portuguessemmisterio.com.br/2016/12/12/o-que-significa-e-como-usar-etc/">Como usar &#8220;etc.&#8221;</a></li>
+	<li id="menu-item-2079" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2079"><a href="https://portuguessemmisterio.com.br/2016/12/09/modismos-linguisticos-que-devem-ser-evitados/">Modismos linguísticos</a></li>
+	<li id="menu-item-2071" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2071"><a href="https://portuguessemmisterio.com.br/2016/12/02/entanda-o-juridiques-do-noticiario/">Entenda o juridiquês do dicionário</a></li>
+	<li id="menu-item-2030" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2030"><a href="https://portuguessemmisterio.com.br/2016/11/28/teste-seu-vocabulario-parte-3/">Teste seu vocabulário &#8211; parte 3</a></li>
+	<li id="menu-item-1991" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1991"><a href="https://portuguessemmisterio.com.br/2016/11/13/teste-seu-vocabulario-parte-2/">Teste seu vocabulário &#8211; parte 2</a></li>
+	<li id="menu-item-1943" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1943"><a href="https://portuguessemmisterio.com.br/2016/11/13/teste-seu-vocabulario-parte-1/">Teste seu vocabulário &#8211; parte 1</a></li>
+	<li id="menu-item-1816" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1816"><a href="https://portuguessemmisterio.com.br/2016/06/28/judiar-e-uma-palavra-de-origem-antissemita/">&#8220;Judiar&#8221; é uma palavra de origem antissemita?</a></li>
+	<li id="menu-item-1827" class="menu-item menu-item-type-post_type menu-item-object-post menu-item-1827"><a href="https://portuguessemmisterio.com.br/2016/06/28/nova-york-new-york-ou-nova-iorque/">Nova Iorque ou Nova York?</a></li>
+</ul>
+</li>
+<li id="menu-item-2541" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-has-children menu-item-2541"><a href="https://portuguessemmisterio.com.br/category/artigos/">Artigos</a>
+<ul class="sub-menu">
+	<li id="menu-item-4168" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4168"><a href="https://portuguessemmisterio.com.br/2019/08/12/de-graca-ate-opiniao-sobre-o-ato-de-escrever/">De graça, até opinião sobre o ato de escrever</a></li>
+	<li id="menu-item-3915" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3915"><a href="https://portuguessemmisterio.com.br/2019/03/10/comunicacao-assertiva/">Comunicação assertiva</a></li>
+	<li id="menu-item-3122" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-3122"><a href="https://portuguessemmisterio.com.br/2018/04/07/por-que-seu-texto-deve-ser-revisado/">Por que seu texto deve ser revisado?</a></li>
+	<li id="menu-item-2856" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2856"><a href="https://portuguessemmisterio.com.br/2018/01/05/presenca-judaica-na-lingua-portuguesa-expressoes-e-dizeres-populares-em-portugues-de-origem-crista-nova-ou-marrana/">Presença judaica na língua portuguesa</a></li>
+	<li id="menu-item-2705" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2705"><a href="https://portuguessemmisterio.com.br/2017/12/11/normas-da-puc-rj-para-apresentacao-de-teses-e-dissertacoes/">Normas para trabalho acadêmico &#8211; PUC-Rio</a></li>
+	<li id="menu-item-2561" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2561"><a href="https://portuguessemmisterio.com.br/2017/07/13/tres-conselhos-para-quem-quer-prestar-concurso-publico/">Três conselhos para quem quer prestar concurso</a></li>
+	<li id="menu-item-2481" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2481"><a href="https://portuguessemmisterio.com.br/2017/04/20/por-que-evitar-o-nao-e-a-linguagem-negativa/">Por que evitar o “NÃO” e a linguagem negativa</a></li>
+	<li id="menu-item-2462" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-2462"><a href="https://portuguessemmisterio.com.br/2015/11/24/o-preparador-de-texto/">O preparador de texto</a></li>
+</ul>
+</li>
+<li id="menu-item-2328" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-2328"><a href="https://portuguessemmisterio.com.br/deixe-sua-sugestao-ou-duvida/">Contato</a></li>
+</ul></div>					</nav><!-- #site-navigation -->
+	</header><!-- #masthead -->
+
+	<div id="main" class="site-main">
+
+	<div id="primary" class="content-area">
+		<div id="content" class="site-content" role="main">
+
+		
+			
+<article id="post-836" class="post-836 post type-post status-publish format-standard has-post-thumbnail hentry category-redacao tag-fonte-italica tag-italico tag-portugues-sem-misterio tag-quando-usar">
+	<header class="entry-header">
+		<h1 class="entry-title">Quando usar itálico</h1>
+
+		<div class="entry-meta">
+			<a class="author" rel="author" href="https://portuguessemmisterio.com.br/author/bvibra/">Betty Vibranovski</a> / <a class="entry-date" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/">26 de julho de 2015</a>		</div><!-- .entry-meta -->
+	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<p>1) Nomes de navios, livros, revistas, jornais, filmes, músicas, contos, poemas, peças teatrais, programas de rádio e televisão, obras de arte, pinturas, esculturas, CDs.  Exemplos:</p>
+<ul>
+<li>Na canção <em>Hotel Fraternité</em>, do álbum <em>Qualquer</em>, Arnaldo Antunes fala de um homem fora de si.</li>
+<li>O livro <em>Sapiens &#8211; uma breve história da humanidade</em> é sensacional.</li>
+<li>Já assistiu ao filme <em>Missão Impossível 5</em>?</li>
+</ul>
+<p>2) Destaques do autor. Exemplo: Tom sabia que <em>ele </em>seria o próximo.</p>
+<p>3) Palavras ou locuções em língua estrangeira que não sejam habituais e que não tenham sido dicionarizadas.</p>
+<p>4) Nomes científicos de espécies. Exemplos: <i class="bj">Araucária brasiliensis, Homo sapiens, Homo erectus.</i></p>
+<p>Fonte: Manual de preparação de originais da PUC-Rio.</p>
+<h2><span id="Hist.C3.B3ria" class="mw-headline">História</span></h2>
+<p>Em 1501, Francesco Grifo (1450/1518) criou o &#8220;itálico tipográfico&#8221;: tipos em metal inspirados nas letras cursivas das chancelarias Italianas para a imprensa veneziana de Aldus Manutius. Os tipos itálicos de Griffo economizavam espaço, em relação aos tipos romanos e foram utilizados para compor, em 1501, uma obra de Virgílio na oficina de Manutius. O itálico foi criado, naquela época, para ser utilizado como fonte de texto e não como fonte auxiliar, como é utilizada atualmente.</p>
+<p>Fonte: Wikipedia.</p>
+<p>Leia também: <a href="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/" target="_blank" rel="noopener">Quando usar aspas</a>.</p>
+<p>Curta a página do blog Português sem Mistério no <a href="https://www.facebook.com/portugues.sem.misterio">Facebook </a>e siga-o no <a href="https://twitter.com/PortuguesSM">Twitter</a>.</p>
+<p><a href="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg"><img loading="lazy" data-attachment-id="682" data-permalink="https://portuguessemmisterio.com.br/2015/07/20/o-hifen-de-bem-e-de-mal/banner-revisao-de-textos-com-moldura/" data-orig-file="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg" data-orig-size="880,420" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="BANNER-REVISÃO DE TEXTOS-COM MOLDURA" data-image-description="" data-image-caption="" data-medium-file="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=300" data-large-file="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=700" class="  wp-image-682 aligncenter" src="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=449&#038;h=215" alt="Revisão de Textos - Betty Vibranovski" width="449" height="215" srcset="https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=449&amp;h=215 449w, https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=150&amp;h=72 150w, https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=300&amp;h=143 300w, https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg?w=768&amp;h=367 768w, https://portuguessemmisterio.files.wordpress.com/2015/07/banner-revisc3a3o-de-textos-com-moldura.jpg 880w" sizes="(max-width: 449px) 100vw, 449px" /></a></p>
+<style>.wordads-ad-wrapper {display:none;font: normal 11px Arial, sans-serif;letter-spacing: 1px;text-decoration: none;width: 100%;margin: 25px auto;padding: 0;}.wordads-ad-title {margin-bottom: 5px;}.wordads-ad-controls {margin-top: 5px;text-align: right;}.wordads-ad-controls span {cursor: pointer;}.wordads-ad {width: fit-content;margin: 0 auto;}</style><div class="wordads-ad-wrapper"><div class="wordads-ad"><div class="wordads-ad-title">Publicidade</div><div class="wordads-ad-content" id="sas_110354"></div><div class="wordads-ad-controls"></div></div></div><script>sas.cmd.push(function() {sas.render("sas_110354");});window._stq = window._stq || [];window._stq.push( ['extra',{x_wordads_smart: 'render_sas_110354',},] );</script><div id="jp-post-flair" class="sharedaddy sd-like-enabled sd-sharing-enabled"><div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-official sd-sharing"><h3 class="sd-title">Gostou? Que tal me ajudar compartilhando esta postagem?</h3><div class="sd-content"><ul><li class="share-jetpack-whatsapp"><a rel="nofollow noopener noreferrer" data-shared="" class="share-jetpack-whatsapp sd-button" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?share=jetpack-whatsapp" target="_blank" title="Clique para compartilhar no WhatsApp" ><span>WhatsApp</span></a></li><li class="share-facebook"><div class="fb-share-button" data-href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" data-layout="button_count"></div></li><li class="share-twitter"><a href="https://twitter.com/share" class="twitter-share-button" data-url="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" data-text="Quando usar itálico" data-via="PortuguesSM" data-related="wordpressdotcom">Tweet</a></li><li class="share-linkedin"><div class="linkedin_button"><script type="in/share" data-url="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" data-counter="right"></script></div></li><li class="share-pinterest"><div class="pinterest_button"><a href="https://www.pinterest.com/pin/create/button/?url=https%3A%2F%2Fportuguessemmisterio.com.br%2F2015%2F07%2F26%2Fquando-usar-italico%2F&#038;media=https%3A%2F%2Fportuguessemmisterio.files.wordpress.com%2F2015%2F07%2Fitc3a1lico.png%3Fw%3D1200&#038;description=Quando%20usar%20it%C3%A1lico" data-pin-do="buttonPin" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a></div></li><li class="share-print"><a rel="nofollow noopener noreferrer" data-shared="" class="share-print sd-button" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#print" target="_blank" title="Clique para imprimir" ><span>Imprimir</span></a></li><li class="share-end"></li></ul></div></div></div><div class='sharedaddy sd-block sd-like jetpack-likes-widget-wrapper jetpack-likes-widget-unloaded' id='like-post-wrapper-94243537-836-64775f033b8ef' data-src='//widgets.wp.com/likes/index.html?ver=20230309#blog_id=94243537&amp;post_id=836&amp;origin=portuguessemmisterio.wordpress.com&amp;obj_id=94243537-836-64775f033b8ef&amp;domain=portuguessemmisterio.com.br' data-name='like-post-frame-94243537-836-64775f033b8ef' data-title='Curtir ou reblogar'><h3 class='sd-title'>Curtir isso:</h3><div class='likes-widget-placeholder post-likes-widget-placeholder' style='height: 55px;'><span class='button'><span>Curtir</span></span> <span class="loading">Carregando...</span></div><span class='sd-text-color'></span><a class='sd-link-color'></a></div></div>			</div><!-- .entry-content -->
+
+	<footer class="entry-meta">
+		<a class="entry-date" href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/">26 de julho de 2015</a> em <a href="https://portuguessemmisterio.com.br/category/redacao/" rel="category tag">Redação</a>. Tags:<a href="https://portuguessemmisterio.com.br/tag/fonte-italica/" rel="tag">fonte itálica</a>, <a href="https://portuguessemmisterio.com.br/tag/italico/" rel="tag">itálico</a>, <a href="https://portuguessemmisterio.com.br/tag/portugues-sem-misterio/" rel="tag">português sem mistério</a>, <a href="https://portuguessemmisterio.com.br/tag/quando-usar/" rel="tag">quando usar</a>
+			</footer><!-- .entry-meta -->
+</article><!-- #post-## -->
+			<div class="related-content">
+	<h3 class="related-content-title">Posts Relacionados</h3>
+	
+		<article id="post-827" class="post-827 post type-post status-publish format-standard has-post-thumbnail hentry category-redacao tag-aspas tag-portugues-sem-misterio tag-quando-usar-aspas">
+
+						<div class="entry-thumbnail">
+				<a href="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/"><img width="50" height="50" src="https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg?w=50&amp;h=50&amp;crop=1" class="attachment-expound-mini size-expound-mini wp-post-image" alt="" decoding="async" srcset="https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg?w=50&amp;h=50&amp;crop=1 50w, https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg?w=100&amp;h=100&amp;crop=1 100w" sizes="(max-width: 50px) 100vw, 50px" data-attachment-id="828" data-permalink="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/aspas/" data-orig-file="https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg" data-orig-size="257,196" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Aspas" data-image-description="" data-image-caption="" data-medium-file="https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg?w=257" data-large-file="https://portuguessemmisterio.files.wordpress.com/2015/07/aspas.jpg?w=257" /></a>
+			</div>
+			
+			<header class="entry-header">
+				<h3 class="entry-title"><a href="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/" rel="bookmark">Quando usar ASPAS</a></h3>
+			</header><!-- .entry-header -->
+
+		</article>
+
+	
+		<article id="post-1343" class="post-1343 post type-post status-publish format-standard has-post-thumbnail hentry category-gramatica category-sem-categoria tag-concordancia-verbal tag-fracao tag-fracoes tag-percentagem tag-percentual">
+
+						<div class="entry-thumbnail">
+				<a href="https://portuguessemmisterio.com.br/2015/11/19/concordancia-com-fracoes/"><img width="50" height="50" src="https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png?w=50&amp;h=50&amp;crop=1" class="attachment-expound-mini size-expound-mini wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png?w=50&amp;h=50&amp;crop=1 50w, https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png?w=100&amp;h=100&amp;crop=1 100w" sizes="(max-width: 50px) 100vw, 50px" data-attachment-id="1422" data-permalink="https://portuguessemmisterio.com.br/2015/11/19/concordancia-com-fracoes/fracao/" data-orig-file="https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png" data-orig-size="160,160" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="fração-1/5-um-quinto" data-image-description="" data-image-caption="" data-medium-file="https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png?w=160" data-large-file="https://portuguessemmisterio.files.wordpress.com/2015/11/frac3a7c3a3o.png?w=160" /></a>
+			</div>
+			
+			<header class="entry-header">
+				<h3 class="entry-title"><a href="https://portuguessemmisterio.com.br/2015/11/19/concordancia-com-fracoes/" rel="bookmark">Concordância com frações e percentuais</a></h3>
+			</header><!-- .entry-header -->
+
+		</article>
+
+	
+		<article id="post-3346" class="post-3346 post type-post status-publish format-standard has-post-thumbnail hentry category-gramatica tag-a-ou-a tag-a tag-crase tag-gramatica tag-lingua-portuguesa tag-ou">
+
+						<div class="entry-thumbnail">
+				<a href="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-nomes-de-mulheres/"><img width="50" height="50" src="https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png?w=50&amp;h=50&amp;crop=1" class="attachment-expound-mini size-expound-mini wp-post-image" alt="" decoding="async" loading="lazy" srcset="https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png?w=50&amp;h=50&amp;crop=1 50w, https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png?w=100&amp;h=100&amp;crop=1 100w" sizes="(max-width: 50px) 100vw, 50px" data-attachment-id="3356" data-permalink="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-nomes-de-mulheres/quadro-negro-crase-6-nomesdemulher/" data-orig-file="https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png" data-orig-size="482,299" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="quadro negro-CRASE-6-NomesDeMulher" data-image-description="" data-image-caption="" data-medium-file="https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png?w=300" data-large-file="https://portuguessemmisterio.files.wordpress.com/2018/06/quadro-negro-crase-6-nomesdemulher.png?w=482" /></a>
+			</div>
+			
+			<header class="entry-header">
+				<h3 class="entry-title"><a href="https://portuguessemmisterio.com.br/2018/06/01/crase-antes-de-nomes-de-mulheres/" rel="bookmark">CRASE antes de nomes de mulher</a></h3>
+			</header><!-- .entry-header -->
+
+		</article>
+
+	</div>
+
+				<nav role="navigation" id="nav-below" class="navigation-post">
+		<h1 class="screen-reader-text">Navegação de Posts</h1>
+
+	
+		<div class="nav-previous"><a href="https://portuguessemmisterio.com.br/2015/07/25/quando-usar-aspas/" rel="prev"><span class="meta-nav">&larr;</span> Quando usar ASPAS</a></div>		<div class="nav-next"><a href="https://portuguessemmisterio.com.br/2015/07/27/os-5-posts-mais-lidos-em-julho2015/" rel="next">Os 7 posts mais lidos em julho/2015 <span class="meta-nav">&rarr;</span></a></div>
+	
+	</nav><!-- #nav-below -->
+	
+			
+	<div id="comments" class="comments-area">
+
+	
+			<h2 class="comments-title">
+			10 comentários sobre &ldquo;<span>Quando usar itálico</span>&rdquo;		</h2>
+
+		
+		<ol class="comment-list">
+				<li class="comment even thread-even depth-1 highlander-comment" id="li-comment-6452">
+		<article id="comment-6452" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://1.gravatar.com/avatar/7ff1834099f7df6d6263f8544fb5892c?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn">PATRICIA G PALAZZO</cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-6452"><time datetime="2020-11-17T16:54:12-03:00">
+					17 de novembro de 2020 às 16:54					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Olá! Gostaria de saber se nomes próprios estrangeiros com diacríticos e nomes de locais estrangeiros com diacríticos vão em itálico ou não. Muito obrigada!</p>
+<p id="comment-like-6452" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=6452&#038;_wpnonce=3b0faeaddf" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-6452" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=6452#respond' data-commentid="6452" data-postid="836" data-belowelement="comment-6452" data-respondelement="respond" data-replyto="Responder para PATRICIA G PALAZZO" aria-label='Responder para PATRICIA G PALAZZO'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-bvibra bypostauthor odd alt depth-2 highlander-comment" id="li-comment-6453">
+		<article id="comment-6453" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://2.gravatar.com/avatar/b8f0314a26f9c164bad3312fe3ca01b0?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn"><a href="https://portuguessemmisterio.wordpress.com" class="url" rel="ugc external nofollow">Betty Vibranovski</a></cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-6453"><time datetime="2020-11-17T17:12:07-03:00">
+					17 de novembro de 2020 às 17:12					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Olá, Patricia!<br />
+Nomes próprios estrangeiros (nome de pessoas, de locais) não são grafados em itálico.<br />
+Abraço,<br />
+Betty</p>
+<p id="comment-like-6453" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=6453&#038;_wpnonce=1dc2e19f4e" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-6453" class="comment-like-feedback">Curtido por <a href="#" class="view-likers" data-like-count="1">1 pessoa</a></span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=6453#respond' data-commentid="6453" data-postid="836" data-belowelement="comment-6453" data-respondelement="respond" data-replyto="Responder para Betty Vibranovski" aria-label='Responder para Betty Vibranovski'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1 highlander-comment" id="li-comment-3925">
+		<article id="comment-3925" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://1.gravatar.com/avatar/449a8f604afa71a903ec2337815c2fd2?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn">Jorge Lopes</cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3925"><time datetime="2019-08-27T19:34:50-03:00">
+					27 de agosto de 2019 às 19:34					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Olá Betty<br />
+Numa publicação de autor, é incorrecto numa citação usar em simultâneo itálico e aspas?</p>
+<p id="comment-like-3925" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3925&#038;_wpnonce=9e8a7fafbc" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3925" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=3925#respond' data-commentid="3925" data-postid="836" data-belowelement="comment-3925" data-respondelement="respond" data-replyto="Responder para Jorge Lopes" aria-label='Responder para Jorge Lopes'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+	<li class="comment odd alt thread-even depth-1 highlander-comment" id="li-comment-3596">
+		<article id="comment-3596" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://0.gravatar.com/avatar/62ef6aad5fa4f04b3662ba51da53bfef?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn">Leandro Matte</cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3596"><time datetime="2019-06-01T14:59:29-03:00">
+					1 de junho de 2019 às 14:59					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Oi, Betty.<br />
+Uma dúvida para a qual não achei resposta. Quando uso itálico num tcc, é somente na primeira vez que a palavra é mencionada ou sempre a palavra dever estar em itálico, no trabalho todo?<br />
+Obrigado.</p>
+<p id="comment-like-3596" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3596&#038;_wpnonce=90d217cb9f" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3596" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=3596#respond' data-commentid="3596" data-postid="836" data-belowelement="comment-3596" data-respondelement="respond" data-replyto="Responder para Leandro Matte" aria-label='Responder para Leandro Matte'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-bvibra bypostauthor even depth-2 highlander-comment" id="li-comment-3601">
+		<article id="comment-3601" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://2.gravatar.com/avatar/b8f0314a26f9c164bad3312fe3ca01b0?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn"><a href="https://portuguessemmisterio.wordpress.com" class="url" rel="ugc external nofollow">Betty Vibranovski</a></cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3601"><time datetime="2019-06-02T23:17:34-03:00">
+					2 de junho de 2019 às 23:17					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Oi, Leandro.<br />
+A palavra em itálico deve ficar dessa mesma forma no texto todo.<br />
+Abraço,<br />
+Betty</p>
+<p id="comment-like-3601" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3601&#038;_wpnonce=7f9ad781dc" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3601" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=3601#respond' data-commentid="3601" data-postid="836" data-belowelement="comment-3601" data-respondelement="respond" data-replyto="Responder para Betty Vibranovski" aria-label='Responder para Betty Vibranovski'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment odd alt thread-odd thread-alt depth-1 highlander-comment" id="li-comment-3334">
+		<article id="comment-3334" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://1.gravatar.com/avatar/4033d576ed3b384f9de0f6b441a77725?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn">Moisés Guimarães</cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3334"><time datetime="2019-03-26T17:30:23-03:00">
+					26 de março de 2019 às 17:30					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Uma dúvida.<br />
+Na palavra habitat devo usar o itálico?</p>
+<p id="comment-like-3334" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3334&#038;_wpnonce=5d8ca4cfc9" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3334" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=3334#respond' data-commentid="3334" data-postid="836" data-belowelement="comment-3334" data-respondelement="respond" data-replyto="Responder para Moisés Guimarães" aria-label='Responder para Moisés Guimarães'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-bvibra bypostauthor even depth-2 highlander-comment" id="li-comment-3342">
+		<article id="comment-3342" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://2.gravatar.com/avatar/b8f0314a26f9c164bad3312fe3ca01b0?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn"><a href="https://portuguessemmisterio.wordpress.com" class="url" rel="ugc external nofollow">Betty Vibranovski</a></cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3342"><time datetime="2019-03-27T15:07:12-03:00">
+					27 de março de 2019 às 15:07					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Olá, Moisés.<br />
+A palavra &#8220;habitat&#8221; pode ficar em redondo (sem itálico)<br />
+Abraço,<br />
+Betty</p>
+<p id="comment-like-3342" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3342&#038;_wpnonce=eeb407eb28" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3342" class="comment-like-feedback">Curtido por <a href="#" class="view-likers" data-like-count="1">1 pessoa</a></span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=3342#respond' data-commentid="3342" data-postid="836" data-belowelement="comment-3342" data-respondelement="respond" data-replyto="Responder para Betty Vibranovski" aria-label='Responder para Betty Vibranovski'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment byuser comment-author-o4km4n odd alt thread-even depth-1 highlander-comment" id="li-comment-2318">
+		<article id="comment-2318" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://1.gravatar.com/avatar/da8d4f6c0fe3dac5ffb862670c4b7591?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn"><a href="http://www.memoriabit.com.br/" class="url" rel="ugc external nofollow">l3m35</a></cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-2318"><time datetime="2018-06-26T18:58:02-03:00">
+					26 de junho de 2018 às 18:58					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Uma dúvida: devemos usar itálico sempre ou só na primeira ocorrência dentro do texto? Exemplo: um longo artigo cita o nome de um evento várias vezes. Usamos itálico em todas as citações, ou na primeira basta?</p>
+<p id="comment-like-2318" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=2318&#038;_wpnonce=7827ea94bd" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-2318" class="comment-like-feedback">Curtido por <a href="#" class="view-likers" data-like-count="1">1 pessoa</a></span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=2318#respond' data-commentid="2318" data-postid="836" data-belowelement="comment-2318" data-respondelement="respond" data-replyto="Responder para l3m35" aria-label='Responder para l3m35'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-bvibra bypostauthor even depth-2 highlander-comment" id="li-comment-2319">
+		<article id="comment-2319" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://2.gravatar.com/avatar/b8f0314a26f9c164bad3312fe3ca01b0?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn"><a href="https://portuguessemmisterio.wordpress.com" class="url" rel="ugc external nofollow">Betty Vibranovski</a></cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-2319"><time datetime="2018-06-26T19:10:31-03:00">
+					26 de junho de 2018 às 19:10					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Olá.<br />
+Usamos em todas as ocorrências dentro do texto.<br />
+Exemplo: título de um livro.</p>
+<p>Betty</p>
+<p id="comment-like-2319" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=2319&#038;_wpnonce=a23f094ab2" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-2319" class="comment-like-feedback">Curtido por <a href="#" class="view-likers" data-like-count="2">2 pessoas</a></span></p>
+</div>
+
+			<div class="reply">
+			<a rel='nofollow' class='comment-reply-link' href='https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?replytocom=2319#respond' data-commentid="2319" data-postid="836" data-belowelement="comment-2319" data-respondelement="respond" data-replyto="Responder para Betty Vibranovski" aria-label='Responder para Betty Vibranovski'>Responder</a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment odd alt depth-3 highlander-comment" id="li-comment-3929">
+		<article id="comment-3929" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt='' src='https://2.gravatar.com/avatar/e948e7a2edb9789aca60464a0c18d879?s=40&#038;d=identicon&#038;r=G' class='avatar avatar-40' height='40' width='40' />					<cite class="fn">Lara</cite> <span class="says">disse:</span>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta commentmetadata">
+					<a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/#comment-3929"><time datetime="2019-08-28T20:30:51-03:00">
+					28 de agosto de 2019 às 20:30					</time></a>
+									</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Porque a palavra hoje está destacada (em itálico) no texto?</p>
+<p id="comment-like-3929" data-liked=comment-not-liked class="comment-likes comment-not-liked"><a href="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/?like_comment=3929&#038;_wpnonce=8c40d8b6b9" class="comment-like-link needs-login" rel="nofollow" data-blog="94243537"><span>Curtir</span></a><span id="comment-like-count-3929" class="comment-like-feedback">Curtir</span></p>
+</div>
+
+			<div class="reply">
+						</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+		</ol><!-- .comment-list -->
+
+		
+	
+	
+		<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Deixe um comentário <small><a rel="nofollow" id="cancel-comment-reply-link" href="/2015/07/26/quando-usar-italico/#respond" style="display:none;">Cancelar resposta</a></small></h3><form action="https://portuguessemmisterio.com.br/wp-comments-post.php" method="post" id="commentform" class="comment-form"><input type="hidden" id="highlander_comment_nonce" name="highlander_comment_nonce" value="10ac8d9246" /><input type="hidden" name="_wp_http_referer" value="/2015/07/26/quando-usar-italico/" />
+<input type="hidden" name="hc_post_as" id="hc_post_as" value="guest" />
+
+<div class="comment-form-field comment-textarea">
+	<label for="comment">Digite seu comentário aqui...</label>
+	<div id="comment-form-comment"><textarea id="comment" name="comment" title="Digite seu comentário aqui..."></textarea></div>
+</div>
+
+<div id="comment-form-identity">
+	<div id="comment-form-nascar">
+		<p>Preencha os seus dados abaixo ou clique em um ícone para log in:</p>
+		<ul>
+			<li class="selected" style="display:none;">
+				<a href="#comment-form-guest" id="postas-guest" class="nascar-signin-link"
+				 title="Login via Convidado" 				>
+									</a>
+			</li>
+			<li>
+				<a href="#comment-form-load-service:WordPress.com" id="postas-wordpress" class="nascar-signin-link"
+				 title="Login via WordPress.com" 				>
+					<svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#0087be" d="M12.158 12.786l-2.698 7.84c.806.236 1.657.365 2.54.365 1.047 0 2.05-.18 2.986-.51-.024-.037-.046-.078-.065-.123l-2.762-7.57zM3.008 12c0 3.56 2.07 6.634 5.068 8.092L3.788 8.342c-.5 1.117-.78 2.354-.78 3.658zm15.06-.454c0-1.112-.398-1.88-.74-2.48-.456-.74-.883-1.368-.883-2.11 0-.825.627-1.595 1.51-1.595.04 0 .078.006.116.008-1.598-1.464-3.73-2.36-6.07-2.36-3.14 0-5.904 1.613-7.512 4.053.21.008.41.012.58.012.94 0 2.395-.114 2.395-.114.484-.028.54.684.057.74 0 0-.487.058-1.03.086l3.275 9.74 1.968-5.902-1.4-3.838c-.485-.028-.944-.085-.944-.085-.486-.03-.43-.77.056-.742 0 0 1.484.114 2.368.114.94 0 2.397-.114 2.397-.114.486-.028.543.684.058.74 0 0-.488.058-1.03.086l3.25 9.665.897-2.997c.456-1.17.684-2.137.684-2.907zm1.82-3.86c.04.286.06.593.06.924 0 .912-.17 1.938-.683 3.22l-2.746 7.94c2.672-1.558 4.47-4.454 4.47-7.77 0-1.564-.4-3.033-1.1-4.314zM12 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></g></svg>				</a>
+			</li>
+			<li>
+				<a href="#comment-form-load-service:Facebook" id="postas-facebook" class="nascar-signin-link"
+				 title="Login via Facebook" 				>
+					<svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#3B5998" d="M20.007 3H3.993C3.445 3 3 3.445 3 3.993v16.013c0 .55.445.994.993.994h8.62v-6.97H10.27V11.31h2.346V9.31c0-2.325 1.42-3.59 3.494-3.59.993 0 1.847.073 2.096.106v2.43h-1.438c-1.128 0-1.346.537-1.346 1.324v1.734h2.69l-.35 2.717h-2.34V21h4.587c.548 0 .993-.445.993-.993V3.993c0-.548-.445-.993-.993-.993z"/></g></svg>				</a>
+			</li>
+		</ul>
+	</div>
+
+	<div id="comment-form-guest" class="comment-form-service selected">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+<a href="https://gravatar.com/site/signup/" target="_blank">				<img src="https://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=25&amp;d=identicon&amp;forcedefault=y&amp;r=G" alt="Gravatar" width="25" class="no-grav" />
+</a>			</div>
+
+				<div class="comment-form-fields">
+				<div class="comment-form-field comment-form-email">
+					<label for="email">Email <span class="required">(obrigatório)</span> <span class="nopublish">(Nunca tornar endereço público)</span></label>
+					<div class="comment-form-input"><input id="email" name="email" type="email" value="" /></div>
+				</div>
+				<div class="comment-form-field comment-form-author">
+					<label for="author">Nome <span class="required">(obrigatório)</span></label>
+					<div class="comment-form-input"><input id="author" name="author" type="text" value="" /></div>
+				</div>
+				<div class="comment-form-field comment-form-url">
+					<label for="url">Site</label>
+					<div class="comment-form-input"><input id="url" name="url" type="url" value="" /></div>
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+	<div id="comment-form-wordpress" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="https://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=25&amp;d=identicon&amp;forcedefault=y&amp;r=G" alt="Logo do WordPress.com" width="25" class="no-grav" />
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="wp_avatar" id="wordpress-avatar" class="comment-meta-wordpress" value="" />
+				<input type="hidden" name="wp_user_id" id="wordpress-user_id" class="comment-meta-wordpress" value="" />
+				<input type="hidden" name="wp_access_token" id="wordpress-access_token" class="comment-meta-wordpress" value="" />
+						<p class="comment-form-posting-as pa-wordpress">
+			<strong></strong>
+			Você está comentando utilizando sua conta WordPress.com.			<span class="comment-form-log-out">
+				(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( 'wordpress' );">Sair</a>&nbsp;/&nbsp;
+				<a href="#" onclick="javascript:HighlanderComments.switchAccount();return false;">Alterar</a>&nbsp;)
+			</span>
+			<span class="pa-icon"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#0087be" d="M12.158 12.786l-2.698 7.84c.806.236 1.657.365 2.54.365 1.047 0 2.05-.18 2.986-.51-.024-.037-.046-.078-.065-.123l-2.762-7.57zM3.008 12c0 3.56 2.07 6.634 5.068 8.092L3.788 8.342c-.5 1.117-.78 2.354-.78 3.658zm15.06-.454c0-1.112-.398-1.88-.74-2.48-.456-.74-.883-1.368-.883-2.11 0-.825.627-1.595 1.51-1.595.04 0 .078.006.116.008-1.598-1.464-3.73-2.36-6.07-2.36-3.14 0-5.904 1.613-7.512 4.053.21.008.41.012.58.012.94 0 2.395-.114 2.395-.114.484-.028.54.684.057.74 0 0-.487.058-1.03.086l3.275 9.74 1.968-5.902-1.4-3.838c-.485-.028-.944-.085-.944-.085-.486-.03-.43-.77.056-.742 0 0 1.484.114 2.368.114.94 0 2.397-.114 2.397-.114.486-.028.543.684.058.74 0 0-.488.058-1.03.086l3.25 9.665.897-2.997c.456-1.17.684-2.137.684-2.907zm1.82-3.86c.04.286.06.593.06.924 0 .912-.17 1.938-.683 3.22l-2.746 7.94c2.672-1.558 4.47-4.454 4.47-7.77 0-1.564-.4-3.033-1.1-4.314zM12 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></g></svg></span>
+		</p>
+					</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-facebook" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="" alt="Foto do Facebook" width="25" class="no-grav" />
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="fb_avatar" id="facebook-avatar" class="comment-meta-facebook" value="" />
+				<input type="hidden" name="fb_user_id" id="facebook-user_id" class="comment-meta-facebook" value="" />
+				<input type="hidden" name="fb_access_token" id="facebook-access_token" class="comment-meta-facebook" value="" />
+						<p class="comment-form-posting-as pa-facebook">
+			<strong></strong>
+			Você está comentando utilizando sua conta Facebook.			<span class="comment-form-log-out">
+				(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( 'facebook' );">Sair</a>&nbsp;/&nbsp;
+				<a href="#" onclick="javascript:HighlanderComments.switchAccount();return false;">Alterar</a>&nbsp;)
+			</span>
+			<span class="pa-icon"><svg xmlns="http://www.w3.org/2000/svg" role="presentation" viewBox="0 0 24 24" ><rect x="0" fill="none" width="24" height="24"/><g><path fill="#3B5998" d="M20.007 3H3.993C3.445 3 3 3.445 3 3.993v16.013c0 .55.445.994.993.994h8.62v-6.97H10.27V11.31h2.346V9.31c0-2.325 1.42-3.59 3.494-3.59.993 0 1.847.073 2.096.106v2.43h-1.438c-1.128 0-1.346.537-1.346 1.324v1.734h2.69l-.35 2.717h-2.34V21h4.587c.548 0 .993-.445.993-.993V3.993c0-.548-.445-.993-.993-.993z"/></g></svg></span>
+		</p>
+					</div>
+	
+		</div>
+	</div>
+
+
+	<div id="comment-form-load-service" class="comment-form-service">
+		<div class="comment-form-posting-as-cancel"><a href="javascript:HighlanderComments.cancelExternalWindow();">Cancelar</a></div>
+		<p>Conectando a %s</p>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+var highlander_expando_javascript = function () {
+
+	function hide( sel ) {
+		var el = document.querySelector( sel );
+		if ( el ) {
+			el.style.setProperty( 'display', 'none' );
+		}
+	}
+
+	function show( sel ) {
+		var el = document.querySelector( sel );
+		if ( el ) {
+			el.style.removeProperty( 'display' );
+		}
+	}
+
+	var input = document.createElement( 'input' );
+	var comment = document.querySelector( '#comment' );
+
+	if ( input && comment && 'placeholder' in input ) {
+		var label = document.querySelector( '.comment-textarea label' );
+		if ( label ) {
+			var text = label.textContent;
+			label.parentNode.removeChild( label );
+			comment.setAttribute( 'placeholder', text );
+		}
+	}
+
+	// Expando Mode: start small, then auto-resize on first click + text length
+	hide( '#comment-form-identity' );
+	hide( '#comment-form-subscribe' );
+	hide( '#commentform .form-submit' );
+
+	if ( comment ) {
+		comment.style.height = '10px';
+
+		var handler = function () {
+			comment.style.height = HighlanderComments.initialHeight + 'px';
+			show( '#comment-form-identity' );
+			show( '#comment-form-subscribe' );
+			show( '#commentform .form-submit' );
+			HighlanderComments.resizeCallback();
+
+			comment.removeEventListener( 'focus', handler );
+		};
+
+		comment.addEventListener( 'focus', handler );
+	}
+}
+
+if ( document.readyState !== 'loading' ) {
+	highlander_expando_javascript();
+} else {
+	document.addEventListener( 'DOMContentLoaded', highlander_expando_javascript );
+}
+
+</script>
+
+<div id="comment-form-subscribe">
+	<p class="comment-subscription-form"><input type="checkbox" name="subscribe" id="subscribe" value="subscribe" style="width: auto;"/> <label class="subscribe-label" id="subscribe-label" for="subscribe" style="display: inline;">Avise-me sobre novos comentários por email.</label></p><p class="post-subscription-form"><input type="checkbox" name="subscribe_blog" id="subscribe_blog" value="subscribe" style="width: auto;"/> <label class="subscribe-label" id="subscribe-blog-label" for="subscribe_blog"  style="display: inline;">Avise-me sobre novas publicações por email.</label></p></div>
+
+
+
+
+<p class="form-submit"><input name="submit" type="submit" id="comment-submit" class="submit button" value="Publicar comentário" /> <input type='hidden' name='comment_post_ID' value='836' id='comment_post_ID' />
+<input type='hidden' name='comment_parent' id='comment_parent' value='0' />
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="ff7b7543b4" /></p>
+<input type="hidden" name="genseq" value="1685544707" />
+<p style="display: none !important;"><label>&#916;<textarea name="ak_hp_textarea" cols="45" rows="8" maxlength="100"></textarea></label><input type="hidden" id="ak_js_1" name="ak_js" value="176"/><script>document.getElementById( "ak_js_1" ).setAttribute( "value", ( new Date() ).getTime() );</script></p></form>	</div><!-- #respond -->
+	<div style="clear: both"></div>
+</div><!-- #comments -->
+
+		
+		</div><!-- #content -->
+	</div><!-- #primary -->
+
+	<div id="secondary" class="widget-area" role="complementary">
+					<div id="atatags-942435373-64775f0350d49"></div>
+			
+			<script>
+				__ATA.cmd.push(function() {
+					__ATA.initDynamicSlot({
+						id: 'atatags-942435373-64775f0350d49',
+						location: 140,
+						formFactor: '003',
+						label: {
+							text: 'Anúncios',
+						},
+						creative: {
+							reportAd: {
+								text: 'Denunciar este anúncio',
+							},
+							privacySettings: {
+								text: 'Privacidade',
+								
+							}
+						}
+					});
+				});
+			</script>		<aside id="search-12" class="widget widget_search"><h1 class="widget-title">Procure neste blog:</h1>	<form method="get" id="searchform" class="searchform" action="https://portuguessemmisterio.com.br/" role="search">
+		<label for="s" class="screen-reader-text">Pesquisa</label>
+		<input type="search" class="field" name="s" value="" id="s" placeholder="Pesquisar &hellip;" />
+		<input type="submit" class="submit" id="searchsubmit" value="Pesquisar" />
+	</form>
+</aside><aside id="blog_subscription-3" class="widget widget_blog_subscription jetpack_subscription_widget"><h1 class="widget-title"><label for="subscribe-field">Assine o Blog</label></h1>
+
+			<div class="wp-block-jetpack-subscriptions__container">
+			<form
+				action="https://subscribe.wordpress.com"
+				method="post"
+				accept-charset="utf-8"
+				data-blog="94243537"
+				data-post_access_level="everybody"
+				id="subscribe-blog"
+			>
+				<p>Digite seu endereço de e-mail para receber notificações de novos posts. Você poderá cancelar a "assinatura" a qualquer momento.</p>
+				<p id="subscribe-email">
+					<label
+						id="subscribe-field-label"
+						for="subscribe-field"
+						class="screen-reader-text"
+					>
+						Endereço de e-mail:					</label>
+
+					<input
+							type="email"
+							name="email"
+							
+							style="width: 95%; padding: 1px 10px"
+							placeholder="Endereço de e-mail"
+							value=""
+							id="subscribe-field"
+							required
+						/>				</p>
+
+				<p id="subscribe-submit"
+									>
+					<input type="hidden" name="action" value="subscribe"/>
+					<input type="hidden" name="blog_id" value="94243537"/>
+					<input type="hidden" name="source" value="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/"/>
+					<input type="hidden" name="sub-type" value="widget"/>
+					<input type="hidden" name="redirect_fragment" value="subscribe-blog"/>
+					<input type="hidden" id="_wpnonce" name="_wpnonce" value="f51f590283" />					<button type="submit"
+													class="wp-block-button__link"
+																	>
+						Seguir					</button>
+				</p>
+			</form>
+							<div class="wp-block-jetpack-subscriptions__subscount">
+					Junte-se a 24.610 outros assinantes				</div>
+						</div>
+			
+</aside><aside id="media_image-15" class="widget widget_media_image"><h1 class="widget-title">Livro</h1><style>.widget.widget_media_image { overflow: hidden; }.widget.widget_media_image img { height: auto; max-width: 100%; }</style><a href="https://portuguessemmisterio.com.br/2018/07/16/lancamento-do-livro-as-cascas-de-banana-do-portugues-nao-escorregue-nas-minucias-do-nosso-idioma-da-revisora-betty-vibranovski/"><img width="153" height="224" src="https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg" class="image wp-image-3628  attachment-full size-full" alt="" decoding="async" loading="lazy" style="max-width: 100%; height: auto;" srcset="https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg 153w, https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg?w=102&amp;h=150 102w" sizes="(max-width: 153px) 100vw, 153px" data-attachment-id="3628" data-permalink="https://portuguessemmisterio.com.br/bibliografia/capa-pequena-as-cascas-de-banana-do-portugues/" data-orig-file="https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg" data-orig-size="153,224" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;1525451370&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;1&quot;}" data-image-title="Capa-PEQUENA-As cascas de banana do português" data-image-description="" data-image-caption="" data-medium-file="https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg?w=153" data-large-file="https://portuguessemmisterio.files.wordpress.com/2018/08/capa-pequena-as-cascas-de-banana-do-portuguc3aas.jpg?w=153" /></a></aside><aside id="text-3" class="widget widget_text">			<div class="textwidget"><p><strong>Dúvidas de português? Seus problemas acabaram! O livro AS CASCAS DE BANANA DO PORTUGUÊS, da revisora Betty Vibranovski, está à venda </strong><strong><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=7HN4JSBF9MSNS">aqui</a>. Para  comprar o e-book, clique <a href="https://amzn.to/2xJRtID">aqui</a>.</strong></p>
+</div>
+		</aside><aside id="gravatar-4" class="widget widget_gravatar"><h1 class="widget-title">A autora</h1><p><a href="https://portuguessemmisterio.com.br/sobre/"><img alt='' src='https://2.gravatar.com/avatar/b8f0314a26f9c164bad3312fe3ca01b0?s=128&#038;d=identicon&#038;r=G' class='avatar avatar-128 grav-widget-center' height='128' width='128'  style="display: block; margin: 0 auto;" /></a></p>
+</aside><aside id="text-4" class="widget widget_text">			<div class="textwidget"><p><strong>Meu nome é Betty Vibranovski e sou revisora de textos. Para um orçamento de revisão sem compromisso, entre em contato:</strong></p>
+<p><strong> E-mail: <a href="mailto:b.vibranovski@gmail.com" target="_blank" rel="noopener">b.vibranovski@gmail.com</a><br />
+</strong></p>
+</div>
+		</aside>			<div id="atatags-942435373-64775f035187d"></div>
+			
+			<script>
+				__ATA.cmd.push(function() {
+					__ATA.initDynamicSlot({
+						id: 'atatags-942435373-64775f035187d',
+						location: 140,
+						formFactor: '003',
+						label: {
+							text: 'Anúncios',
+						},
+						creative: {
+							reportAd: {
+								text: 'Denunciar este anúncio',
+							},
+							privacySettings: {
+								text: 'Privacidade',
+								
+							}
+						}
+					});
+				});
+			</script>	</div><!-- #secondary -->
+	</div><!-- #main -->
+
+	<footer id="colophon" class="site-footer" role="contentinfo">
+		<div class="site-info">
+			<a href="https://wordpress.com/?ref=footer_custom_acom" rel="nofollow">Um site WordPress.com</a>.
+ 		</div><!-- .site-info -->
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+<!--  -->
+<script src='//0.gravatar.com/js/gprofiles.js?ver=2023227348cad7c56c8cda123c6ffcde4518c6c17c856dc25ccd8742cd93ebc136a2f4' id='grofiles-cards-js'></script>
+<script id='wpgroho-js-extra'>
+var WPGroHo = {"my_hash":""};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/wp-content/mu-plugins/gravatar-hovercards/wpgroho.js?m=1610363240h'></script>
+
+	<script>
+		// Initialize and attach hovercards to all gravatars
+		( function() {
+			function init() {
+				if ( typeof Gravatar === 'undefined' ) {
+					return;
+				}
+
+				if ( typeof Gravatar.init !== 'function' ) {
+					return;
+				}
+
+				Gravatar.profile_cb = function ( hash, id ) {
+					WPGroHo.syncProfileData( hash, id );
+				};
+
+				Gravatar.my_hash = WPGroHo.my_hash;
+				Gravatar.init( 'body', '#wp-admin-bar-my-account' );
+			}
+
+			if ( document.readyState !== 'loading' ) {
+				init();
+			} else {
+				document.addEventListener( 'DOMContentLoaded', init );
+			}
+		} )();
+	</script>
+
+		<div style="display:none">
+	<div class="grofile-hash-map-7ff1834099f7df6d6263f8544fb5892c">
+	</div>
+	<div class="grofile-hash-map-b8f0314a26f9c164bad3312fe3ca01b0">
+	</div>
+	<div class="grofile-hash-map-449a8f604afa71a903ec2337815c2fd2">
+	</div>
+	<div class="grofile-hash-map-62ef6aad5fa4f04b3662ba51da53bfef">
+	</div>
+	<div class="grofile-hash-map-4033d576ed3b384f9de0f6b441a77725">
+	</div>
+	<div class="grofile-hash-map-da8d4f6c0fe3dac5ffb862670c4b7591">
+	</div>
+	<div class="grofile-hash-map-e948e7a2edb9789aca60464a0c18d879">
+	</div>
+	<div class="grofile-hash-map-b8f0314a26f9c164bad3312fe3ca01b0">
+	</div>
+	</div>
+<script id='highlander-comments-js-extra'>
+var HighlanderComments = {"loggingInText":"Conectando\u2026","submittingText":"Postando Coment\u00e1rio\u2026","postCommentText":"Publicar coment\u00e1rio","connectingToText":"Conectando a %s","commentingAsText":"%1$s: Voc\u00ea est\u00e1 comentando utilizando sua conta %2$s.","logoutText":"Sair","loginText":"Fazer login","connectURL":"https:\/\/portuguessemmisterio.wordpress.com\/public.api\/connect\/?action=request&domain=portuguessemmisterio.com.br","logoutURL":"https:\/\/portuguessemmisterio.wordpress.com\/wp-login.php?action=logout&_wpnonce=d573ef0825","homeURL":"https:\/\/portuguessemmisterio.com.br\/","postID":"836","gravDefault":"identicon","enterACommentError":"Por favor escreva um coment\u00e1rio","enterEmailError":"Insira seu endere\u00e7o de email aqui","invalidEmailError":"Email inv\u00e1lido","enterAuthorError":"Digite o seu nome aqui","gravatarFromEmail":"Essa foto aparecer\u00e1 sempre que voc\u00ea deixar um coment\u00e1rio. Clicar para personaliz\u00e1-la.","logInToExternalAccount":"Fa\u00e7a login para usar detalhes de uma de suas conta.","change":"Alterar","changeAccount":"Alterar Conta","comment_registration":"","userIsLoggedIn":"","isJetpack":"","text_direction":"ltr"};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??/wp-content/js/textarea-autosize.min.js,/wp-content/mu-plugins/highlander-comments/script.js?m=1663141412j'></script>
+		<script type="text/javascript">
+		( function() {
+			function init() {
+				document.body.addEventListener( 'is.post-load', function() {
+					if ( typeof __ATA.insertInlineAds === 'function' ) {
+						__ATA.insertInlineAds();
+					}
+				} );
+			}
+
+			if ( document.readyState !== 'loading' ) {
+				init();
+			} else {
+				document.addEventListener( 'DOMContentLoaded', init );
+			}
+		} )();
+		</script>	<div id="actionbar" style="display: none;"
+			class="actnbr-pub-expound actnbr-has-follow">
+		<ul>
+								<li class="actnbr-btn actnbr-hidden">
+								<a class="actnbr-action actnbr-actn-follow " href="">
+			<svg class="gridicon gridicons-reader-follow" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"/></g></svg><span>Seguir</span>
+		</a>
+		<a class="actnbr-action actnbr-actn-following  no-display" href="">
+			<svg class="gridicon gridicons-reader-following" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 13.482L15.508 21 12 17.4l1.412-1.388 2.106 2.188 6.094-6.094L23 13.482zm-7.455 1.862L20 10.89V2H2v14c0 1.1.9 2 2 2h4.538l4.913-4.832 2.095 2.176zM8 13H4v-1h4v1zm3-2H4v-1h7v1zm0-2H4V8h7v1zm7-3H4V4h14v2z"/></g></svg><span>Seguindo</span>
+		</a>
+							<div class="actnbr-popover tip tip-top-left actnbr-notice" id="follow-bubble">
+							<div class="tip-arrow"></div>
+							<div class="tip-inner actnbr-follow-bubble">
+															<ul>
+											<li class="actnbr-sitename">
+			<a href="https://portuguessemmisterio.com.br">
+				<img alt='' src='https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=50' class='avatar avatar-50' height='50' width='50' />				Blog Português sem Mistério			</a>
+		</li>
+										<form method="post" action="https://subscribe.wordpress.com" accept-charset="utf-8" style="display: none;">
+																						<div class="actnbr-follow-count">Junte-se a 920 outros seguidores</div>
+																					<div>
+										<input type="email" name="email" placeholder="Insira seu endereço de email" class="actnbr-email-field" aria-label="Insira seu endereço de email" />
+										</div>
+										<input type="hidden" name="action" value="subscribe" />
+										<input type="hidden" name="blog_id" value="94243537" />
+										<input type="hidden" name="source" value="https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" />
+										<input type="hidden" name="sub-type" value="actionbar-follow" />
+										<input type="hidden" id="_wpnonce" name="_wpnonce" value="f51f590283" />										<div class="actnbr-button-wrap">
+											<button type="submit" value="Cadastre-me">
+												Cadastre-me											</button>
+										</div>
+									</form>
+									<li class="actnbr-login-nudge">
+										<div>
+											Já tem uma conta do WordPress.com? <a href="https://wordpress.com/log-in?redirect_to=https%3A%2F%2Fr-login.wordpress.com%2Fremote-login.php%3Faction%3Dlink%26back%3Dhttps%253A%252F%252Fportuguessemmisterio.com.br%252F2015%252F07%252F26%252Fquando-usar-italico%252F">Faça login agora.</a>										</div>
+									</li>
+								</ul>
+															</div>
+						</div>
+					</li>
+							<li class="actnbr-ellipsis actnbr-hidden">
+				<svg class="gridicon gridicons-ellipsis" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M7 12c0 1.104-.896 2-2 2s-2-.896-2-2 .896-2 2-2 2 .896 2 2zm12-2c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm-7 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2z"/></g></svg>				<div class="actnbr-popover tip tip-top-left actnbr-more">
+					<div class="tip-arrow"></div>
+					<div class="tip-inner">
+						<ul>
+									<li class="actnbr-sitename">
+			<a href="https://portuguessemmisterio.com.br">
+				<img alt='' src='https://portuguessemmisterio.files.wordpress.com/2018/02/logo-blog.jpg?w=50' class='avatar avatar-50' height='50' width='50' />				Blog Português sem Mistério			</a>
+		</li>
+								<li class="actnbr-folded-customize">
+								<a href="https://portuguessemmisterio.wordpress.com/wp-admin/customize.php?url=https%3A%2F%2Fportuguessemmisterio.wordpress.com%2F2015%2F07%2F26%2Fquando-usar-italico%2F">
+									<svg class="gridicon gridicons-customize" height="20" width="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M2 6c0-1.505.78-3.08 2-4 0 .845.69 2 2 2 1.657 0 3 1.343 3 3 0 .386-.08.752-.212 1.09.74.594 1.476 1.19 2.19 1.81L8.9 11.98c-.62-.716-1.214-1.454-1.807-2.192C6.753 9.92 6.387 10 6 10c-2.21 0-4-1.79-4-4zm12.152 6.848l1.34-1.34c.607.304 1.283.492 2.008.492 2.485 0 4.5-2.015 4.5-4.5 0-.725-.188-1.4-.493-2.007L18 9l-2-2 3.507-3.507C18.9 3.188 18.225 3 17.5 3 15.015 3 13 5.015 13 7.5c0 .725.188 1.4.493 2.007L3 20l2 2 6.848-6.848c1.885 1.928 3.874 3.753 5.977 5.45l1.425 1.148 1.5-1.5-1.15-1.425c-1.695-2.103-3.52-4.092-5.448-5.977z"/></g></svg>									<span>Personalizar</span>
+								</a>
+							</li>
+																<li class="actnbr-folded-follow">
+												<a class="actnbr-action actnbr-actn-follow " href="">
+			<svg class="gridicon gridicons-reader-follow" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"/></g></svg><span>Seguir</span>
+		</a>
+		<a class="actnbr-action actnbr-actn-following  no-display" href="">
+			<svg class="gridicon gridicons-reader-following" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 13.482L15.508 21 12 17.4l1.412-1.388 2.106 2.188 6.094-6.094L23 13.482zm-7.455 1.862L20 10.89V2H2v14c0 1.1.9 2 2 2h4.538l4.913-4.832 2.095 2.176zM8 13H4v-1h4v1zm3-2H4v-1h7v1zm0-2H4V8h7v1zm7-3H4V4h14v2z"/></g></svg><span>Seguindo</span>
+		</a>
+										</li>
+																	<li class="actnbr-signup"><a href="https://wordpress.com/start/">Registre-se</a></li>
+									<li class="actnbr-login"><a href="https://wordpress.com/log-in?redirect_to=https%3A%2F%2Fr-login.wordpress.com%2Fremote-login.php%3Faction%3Dlink%26back%3Dhttps%253A%252F%252Fportuguessemmisterio.com.br%252F2015%252F07%252F26%252Fquando-usar-italico%252F">Fazer login</a></li>
+																	<li class="actnbr-shortlink"><a href="https://wp.me/p6nr33-du">Copiar link curto</a></li>
+																	<li class="flb-report">
+										<a href="http://en.wordpress.com/abuse/?report_url=https://portuguessemmisterio.com.br/2015/07/26/quando-usar-italico/" target="_blank">
+											Denunciar este conteúdo										</a>
+									</li>
+																	<li class="actnbr-reader">
+										<a href="https://wordpress.com/read/blogs/94243537/posts/836">
+											Ver post no Leitor										</a>
+									</li>
+																	<li class="actnbr-subs">
+										<a href="https://subscribe.wordpress.com/">Gerenciar assinaturas</a>
+									</li>
+																		<li class="actnbr-fold"><a href="">Esconder esta barra</a></li>
+															</ul>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</div>
+	
+<script>
+window.addEventListener( "load", function( event ) {
+	var link = document.createElement( "link" );
+	link.href = "https://s0.wp.com/wp-content/mu-plugins/actionbar/actionbar.css?v=20210915";
+	link.type = "text/css";
+	link.rel = "stylesheet";
+	document.head.appendChild( link );
+
+	var script = document.createElement( "script" );
+	script.src = "https://s0.wp.com/wp-content/mu-plugins/actionbar/actionbar.js?v=20220329";
+	script.defer = true;
+	document.body.appendChild( script );
+} );
+</script>
+
+			<div id="jp-carousel-loading-overlay">
+			<div id="jp-carousel-loading-wrapper">
+				<span id="jp-carousel-library-loading">&nbsp;</span>
+			</div>
+		</div>
+		<div class="jp-carousel-overlay" style="display: none;">
+
+		<div class="jp-carousel-container">
+			<!-- The Carousel Swiper -->
+			<div
+				class="jp-carousel-wrap swiper-container jp-carousel-swiper-container jp-carousel-transitions"
+				itemscope
+				itemtype="https://schema.org/ImageGallery">
+				<div class="jp-carousel swiper-wrapper"></div>
+				<div class="jp-swiper-button-prev swiper-button-prev">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskPrev" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="9" height="12">
+							<path d="M16.2072 16.59L11.6496 12L16.2072 7.41L14.8041 6L8.8335 12L14.8041 18L16.2072 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskPrev)">
+							<rect x="0.579102" width="23.8823" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+				<div class="jp-swiper-button-next swiper-button-next">
+					<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<mask id="maskNext" mask-type="alpha" maskUnits="userSpaceOnUse" x="8" y="6" width="8" height="12">
+							<path d="M8.59814 16.59L13.1557 12L8.59814 7.41L10.0012 6L15.9718 12L10.0012 18L8.59814 16.59Z" fill="white"/>
+						</mask>
+						<g mask="url(#maskNext)">
+							<rect x="0.34375" width="23.8822" height="24" fill="#FFFFFF"/>
+						</g>
+					</svg>
+				</div>
+			</div>
+			<!-- The main close buton -->
+			<div class="jp-carousel-close-hint">
+				<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<mask id="maskClose" mask-type="alpha" maskUnits="userSpaceOnUse" x="5" y="5" width="15" height="14">
+						<path d="M19.3166 6.41L17.9135 5L12.3509 10.59L6.78834 5L5.38525 6.41L10.9478 12L5.38525 17.59L6.78834 19L12.3509 13.41L17.9135 19L19.3166 17.59L13.754 12L19.3166 6.41Z" fill="white"/>
+					</mask>
+					<g mask="url(#maskClose)">
+						<rect x="0.409668" width="23.8823" height="24" fill="#FFFFFF"/>
+					</g>
+				</svg>
+			</div>
+			<!-- Image info, comments and meta -->
+			<div class="jp-carousel-info">
+				<div class="jp-carousel-info-footer">
+					<div class="jp-carousel-pagination-container">
+						<div class="jp-swiper-pagination swiper-pagination"></div>
+						<div class="jp-carousel-pagination"></div>
+					</div>
+					<div class="jp-carousel-photo-title-container">
+						<h2 class="jp-carousel-photo-caption"></h2>
+					</div>
+					<div class="jp-carousel-photo-icons-container">
+						<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-info" aria-label="Alternar visibilidade de metadados de imagem">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskInfo" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M12.7537 2C7.26076 2 2.80273 6.48 2.80273 12C2.80273 17.52 7.26076 22 12.7537 22C18.2466 22 22.7046 17.52 22.7046 12C22.7046 6.48 18.2466 2 12.7537 2ZM11.7586 7V9H13.7488V7H11.7586ZM11.7586 11V17H13.7488V11H11.7586ZM4.79292 12C4.79292 16.41 8.36531 20 12.7537 20C17.142 20 20.7144 16.41 20.7144 12C20.7144 7.59 17.142 4 12.7537 4C8.36531 4 4.79292 7.59 4.79292 12Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskInfo)">
+										<rect x="0.8125" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+							</span>
+						</a>
+												<a href="#" class="jp-carousel-icon-btn jp-carousel-icon-comments" aria-label="Alternar visibilidade de comentários em imagem">
+							<span class="jp-carousel-icon">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="maskComments" mask-type="alpha" maskUnits="userSpaceOnUse" x="2" y="2" width="21" height="20">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M4.3271 2H20.2486C21.3432 2 22.2388 2.9 22.2388 4V16C22.2388 17.1 21.3432 18 20.2486 18H6.31729L2.33691 22V4C2.33691 2.9 3.2325 2 4.3271 2ZM6.31729 16H20.2486V4H4.3271V18L6.31729 16Z" fill="white"/>
+									</mask>
+									<g mask="url(#maskComments)">
+										<rect x="0.34668" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+
+								<span class="jp-carousel-has-comments-indicator" aria-label="Esta imagem contém comentários."></span>
+							</span>
+						</a>
+											</div>
+				</div>
+				<div class="jp-carousel-info-extra">
+					<div class="jp-carousel-info-content-wrapper">
+						<div class="jp-carousel-photo-title-container">
+							<h2 class="jp-carousel-photo-title"></h2>
+						</div>
+						<div class="jp-carousel-comments-wrapper">
+															<div id="jp-carousel-comments-loading">
+									<span>Carregando comentários...</span>
+								</div>
+								<div class="jp-carousel-comments"></div>
+								<div id="jp-carousel-comment-form-container">
+									<span id="jp-carousel-comment-form-spinner">&nbsp;</span>
+									<div id="jp-carousel-comment-post-results"></div>
+																														<form id="jp-carousel-comment-form">
+												<label for="jp-carousel-comment-form-comment-field" class="screen-reader-text">Escreva um Comentário</label>
+												<textarea
+													name="comment"
+													class="jp-carousel-comment-form-field jp-carousel-comment-form-textarea"
+													id="jp-carousel-comment-form-comment-field"
+													placeholder="Escreva um Comentário"
+												></textarea>
+												<div id="jp-carousel-comment-form-submit-and-info-wrapper">
+													<div id="jp-carousel-comment-form-commenting-as">
+																													<fieldset>
+																<label for="jp-carousel-comment-form-email-field">E-mail (obrigatório)</label>
+																<input type="text" name="email" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-email-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-author-field">Nome (obrigatório)</label>
+																<input type="text" name="author" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-author-field" />
+															</fieldset>
+															<fieldset>
+																<label for="jp-carousel-comment-form-url-field">Site</label>
+																<input type="text" name="url" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-url-field" />
+															</fieldset>
+																											</div>
+													<input
+														type="submit"
+														name="submit"
+														class="jp-carousel-comment-form-button"
+														id="jp-carousel-comment-form-button-submit"
+														value="Publicar comentário" />
+												</div>
+											</form>
+																											</div>
+													</div>
+						<div class="jp-carousel-image-meta">
+							<div class="jp-carousel-title-and-caption">
+								<div class="jp-carousel-photo-info">
+									<h3 class="jp-carousel-caption" itemprop="caption description"></h3>
+								</div>
+
+								<div class="jp-carousel-photo-description"></div>
+							</div>
+							<ul class="jp-carousel-image-exif" style="display: none;"></ul>
+							<a class="jp-carousel-image-download" target="_blank" style="display: none;">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="3" y="3" width="19" height="18">
+										<path fill-rule="evenodd" clip-rule="evenodd" d="M5.84615 5V19H19.7775V12H21.7677V19C21.7677 20.1 20.8721 21 19.7775 21H5.84615C4.74159 21 3.85596 20.1 3.85596 19V5C3.85596 3.9 4.74159 3 5.84615 3H12.8118V5H5.84615ZM14.802 5V3H21.7677V10H19.7775V6.41L9.99569 16.24L8.59261 14.83L18.3744 5H14.802Z" fill="white"/>
+									</mask>
+									<g mask="url(#mask0)">
+										<rect x="0.870605" width="23.8823" height="24" fill="#FFFFFF"/>
+									</g>
+								</svg>
+								<span class="jp-carousel-download-text"></span>
+							</a>
+							<div class="jp-carousel-image-map" style="display: none;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		</div>
+		
+	<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"https:\/\/portuguessemmisterio.com.br\/2015\/07\/26\/quando-usar-italico\/":836};
+	</script>
+							<div id="fb-root"></div>
+			<script>(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = 'https://connect.facebook.net/pt_BR/sdk.js#xfbml=1&amp;appId=249643311490&version=v2.3'; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', 'facebook-jssdk'));</script>
+			<script>
+			document.body.addEventListener( 'is.post-load', function() {
+				if ( 'undefined' !== typeof FB ) {
+					FB.XFBML.parse();
+				}
+			} );
+			</script>
+						<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+						<script type="text/javascript">
+				( function () {
+					var currentScript = document.currentScript;
+
+					// Helper function to load an external script.
+					function loadScript( url, cb ) {
+						var script = document.createElement( 'script' );
+						var prev = currentScript || document.getElementsByTagName( 'script' )[ 0 ];
+						script.setAttribute( 'async', true );
+						script.setAttribute( 'src', url );
+						prev.parentNode.insertBefore( script, prev );
+						script.addEventListener( 'load', cb );
+					}
+
+					function init() {
+						loadScript( 'https://platform.linkedin.com/in.js?async=true', function () {
+							if ( typeof IN !== 'undefined' ) {
+								IN.init();
+							}
+						} );
+					}
+
+					if ( document.readyState === 'loading' ) {
+						document.addEventListener( 'DOMContentLoaded', init );
+					} else {
+						init();
+					}
+
+					document.body.addEventListener( 'is.post-load', function() {
+						if ( typeof IN !== 'undefined' ) {
+							IN.parse();
+						}
+					} );
+				} )();
+			</script>
+								<script type="text/javascript">
+				( function () {
+					// Pinterest shared resources
+					var s = document.createElement( 'script' );
+					s.type = 'text/javascript';
+					s.async = true;
+					s.setAttribute( 'data-pin-hover', true );					s.src = window.location.protocol + '//assets.pinterest.com/js/pinit.js';
+					var x = document.getElementsByTagName( 'script' )[ 0 ];
+					x.parentNode.insertBefore(s, x);
+					// if 'Pin it' button has 'counts' make container wider
+					function init() {
+						var shares = document.querySelectorAll( 'li.share-pinterest' );
+						for ( var i = 0; i < shares.length; i++ ) {
+							var share = shares[ i ];
+							var countElement = share.querySelector( 'a span' );
+							if (countElement) {
+								var countComputedStyle = window.getComputedStyle(countElement);
+								if ( countComputedStyle.display === 'block' ) {
+									var countWidth = parseInt( countComputedStyle.width, 10 );
+									share.style.marginRight = countWidth + 11 + 'px';
+								}
+							}
+						}
+					}
+
+					if ( document.readyState !== 'complete' ) {
+						document.addEventListener( 'load', init );
+					} else {
+						init();
+					}
+				} )();
+			</script>
+		<link crossorigin='anonymous' rel='stylesheet' id='all-css-0-3' href='https://s0.wp.com/_static/??-eJyljEsKgDAMBS9kDUUquhDPom0Qaz/BNHh9KdgTuBl4w2PgIWVzKpgKRFEU5DgTg8dCm72+DTHnCicBGex2Z2EMwM9JeKtdkgvYW+YOftTaqYkaXOOix8noQU+z8S9MR0BZ&cssminify=yes' type='text/css' media='all' />
+<script id='comment-like-js-extra'>
+var comment_like_text = {"loading":"Carregando...","swipeUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/comment-likes\/js\/lib\/swipe.js?ver=20131008"};
+</script>
+<script id='jetpack-carousel-js-extra'>
+var jetpackSwiperLibraryPath = {"url":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/jetpack-plugin\/moon\/_inc\/build\/carousel\/swiper-bundle.min.js"};
+var jetpackCarouselStrings = {"widths":[370,700,1000,1200,1400,2000],"is_logged_in":"","lang":"pt","ajaxurl":"https:\/\/portuguessemmisterio.com.br\/wp-admin\/admin-ajax.php","nonce":"e601a9e9ef","display_exif":"1","display_comments":"1","single_image_gallery":"1","single_image_gallery_media_file":"","background_color":"black","comment":"Coment\u00e1rio","post_comment":"Publicar coment\u00e1rio","write_comment":"Escreva um Coment\u00e1rio","loading_comments":"Carregando coment\u00e1rios...","download_original":"Visualizar tamanho original <span class=\"photo-size\">{0}<span class=\"photo-size-times\">\u00d7<\/span>{1}<\/span>","no_comment_text":"Certifique-se de enviar algum texto com o seu coment\u00e1rio.","no_comment_email":"Informe um endere\u00e7o de e-mail para comentar.","no_comment_author":"Forne\u00e7a seu nome para comentar.","comment_post_error":"Desculpe, mas ocorreu um erro ao postar seu coment\u00e1rio. Tente novamente mais tarde.","comment_approved":"Seu coment\u00e1rio foi aprovado.","comment_unapproved":"Seu coment\u00e1rio est\u00e1 aguardando modera\u00e7\u00e3o.","camera":"C\u00e2mera","aperture":"Abertura","shutter_speed":"Velocidade do Obturador","focal_length":"Comprimento Focal","copyright":"Direito autoral","comment_registration":"0","require_name_email":"1","login_url":"https:\/\/portuguessemmisterio.wordpress.com\/wp-login.php?redirect_to=https%3A%2F%2Fportuguessemmisterio.com.br%2F2015%2F07%2F26%2Fquando-usar-italico%2F","blog_id":"94243537","meta_data":["camera","aperture","shutter_speed","focal_length","copyright"],"stats_query_args":"blog=94243537&v=wpcom&tz=-3&user_id=0&subd=portuguessemmisterio","is_public":"1"};
+</script>
+<script id='sharing-js-js-extra'>
+var sharing_js_options = {"lang":"en","counts":"1","is_stats_active":"1"};
+</script>
+<script crossorigin='anonymous' type='text/javascript' src='https://s0.wp.com/_static/??-eJydkNtuwyAQRH+oeHuN+lL1UyoCa3sNLATYXP6+NHGi1JXSqjyxw8yBAXZJmcgVucJUwOKWDKZ9N5U7uDoKopKXgbiAJ4cFNoKCo2brMd8wmxhCk9QpNC2EZbCOGJotyRpwn6Kw/Yqw3tKgK0X+m784So3PTvXRSFE9XeoQGy/2+0syJn/oAv2gX9WYsCZt3DxDiJHho8FgLeQtGJ2jFPQX31n4BasdlYBVPXX3J9xZ6PPRbG/97HyF2qXWZDH+v0oZdUarrT0ct8TD3OE9vD2sXl+eV49tTZ9iidQj'></script>
+<script type='text/javascript'>
+var windowOpen;
+			( function () {
+				function matches( el, sel ) {
+					return !! (
+						el.matches && el.matches( sel ) ||
+						el.msMatchesSelector && el.msMatchesSelector( sel )
+					);
+				}
+
+				document.body.addEventListener( 'click', function ( event ) {
+					if ( ! event.target ) {
+						return;
+					}
+
+					var el;
+					if ( matches( event.target, 'a.share-facebook' ) ) {
+						el = event.target;
+					} else if ( event.target.parentNode && matches( event.target.parentNode, 'a.share-facebook' ) ) {
+						el = event.target.parentNode;
+					}
+
+					if ( el ) {
+						event.preventDefault();
+
+						// If there's another sharing window open, close it.
+						if ( typeof windowOpen !== 'undefined' ) {
+							windowOpen.close();
+						}
+						windowOpen = window.open( el.getAttribute( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+						return false;
+					}
+				} );
+			} )();
+</script>
+<script type="text/javascript">
+// <![CDATA[
+(function() {
+try{
+  if ( window.external &&'msIsSiteMode' in window.external) {
+    if (window.external.msIsSiteMode()) {
+      var jl = document.createElement('script');
+      jl.type='text/javascript';
+      jl.async=true;
+      jl.src='/wp-content/plugins/ie-sitemode/custom-jumplist.php';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(jl, s);
+    }
+  }
+}catch(e){}
+})();
+// ]]>
+</script>	<iframe src='https://widgets.wp.com/likes/master.html?ver=20230309#ver=20230309&amp;lang=pt-br&amp;lang_ver=1670251467&amp;origin=https://portuguessemmisterio.com.br' scrolling='no' id='likes-master' name='likes-master' style='display:none;'></iframe>
+	<div id='likes-other-gravatars'>
+		<div class="likes-text">
+			<span>%d</span> blogueiros gostam disto:		</div>
+		<ul class="wpl-avatars sd-like-gravatars"></ul>
+	</div>
+
+		<script src="//stats.wp.com/w.js?63" defer></script> <script type="text/javascript">
+_tkq = window._tkq || [];
+_stq = window._stq || [];
+_tkq.push(['storeContext', {'blog_id':'94243537','blog_tz':'-3','user_lang':'pt-br','blog_lang':'pt-br','user_id':'0'}]);
+_stq.push(['view', {'blog':'94243537','v':'wpcom','tz':'-3','user_id':'0','post':'836','subd':'portuguessemmisterio'}]);
+_stq.push(['extra', {'crypt':'UE5VTUIlVktzQVNtcFdrRlVoJUNZcTJRQnxOUXc5eXk1aFZxP1dIYTkrUktYbHo3Q0xPSWQuekNFWXMwUkZHX0VRfj1hNy5NbFlbaywsT3ptKzkxZCZxJjViazVvaUszWXEtJVhrYmhnRSZtVENCQi0lQi9LQ1BTJllrKytrSWkrL2NPVS93N2Rlb2dlenl2S2QucXYsQiZmcW5pNVVGbC4wT2k3JkFbMV83eXgtei1IMi0/Zzh2Nm9kdk5pNT1HSkRQQUt0Wms5d1hoTDd3a3pfJnQxMFp8azluSHhiZ1QrR2VVcmxhTXdydVpZLkV3MkY3Slh8Tm80alIzSWwvbk1mQXU='}]);
+_stq.push([ 'clickTrackerInit', '94243537', '836' ]);
+	</script>
+<noscript><img src="https://pixel.wp.com/b.gif?v=noscript" style="height:1px;width:1px;overflow:hidden;position:absolute;bottom:1px;" alt="" /></noscript>
+<script>
+if ( 'object' === typeof wpcom_mobile_user_agent_info ) {
+
+	wpcom_mobile_user_agent_info.init();
+	var mobileStatsQueryString = "";
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedPlatformName )
+		mobileStatsQueryString += "&x_" + 'mobile_platforms' + '=' + wpcom_mobile_user_agent_info.matchedPlatformName;
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedUserAgentName )
+		mobileStatsQueryString += "&x_" + 'mobile_devices' + '=' + wpcom_mobile_user_agent_info.matchedUserAgentName;
+	
+	if( wpcom_mobile_user_agent_info.isIPad() )
+		mobileStatsQueryString += "&x_" + 'ipad_views' + '=' + 'views';
+
+	if( "" != mobileStatsQueryString ) {
+		new Image().src = document.location.protocol + '//pixel.wp.com/g.gif?v=wpcom-no-pv' + mobileStatsQueryString + '&baba=' + Math.random();
+	}
+	
+}
+</script>
+</body>
+</html>
