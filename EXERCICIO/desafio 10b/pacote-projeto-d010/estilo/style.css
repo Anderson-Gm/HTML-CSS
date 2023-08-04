@@ -81,7 +81,7 @@ header > h1 {
     font-family: var(--font-destaque);
     margin-bottom: 20px;
     font-size: 3em;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.655);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.313);
 }
 
 header > p{
@@ -92,7 +92,7 @@ header > p{
     padding-right: 10px;
     padding-left: 10px;
     margin: auto;
-    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.655);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.356);
 }
 
 nav {
