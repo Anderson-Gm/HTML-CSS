@@ -1,0 +1,22 @@
+@charset "UTF-8";
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background: #e1e1f8;
+}
+#titulo {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    font-size: 2.2em;
+    display: block;
+}
+#subtitulo {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    padding-top: 30px;
+}
+fieldset>div {
+    margin: 5px;
+}
